@@ -24,6 +24,7 @@ namespace BPTClient
             
             c.Connect(tbIP.Text, int.Parse(tbPort.Text));
             Client.listClients.Add(c);
+            
            this.Close();
             
         }

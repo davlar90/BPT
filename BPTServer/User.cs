@@ -11,8 +11,14 @@ namespace BPTServer
         private static List<User> Users = new List<User>();
 
         private int UserID { get; set; }
-        private string UserName { get; set; }
+        public string UserName { get; set; }
         private string Password { get; set; }
+
+        public int Chips { get; set; }
+        public bool IsDealer { get; set; }
+        public bool IsSmallBlind { get; set; }
+        public bool IsBigBlind { get; set; }
+        public int TableSeatNumber { get; set; }
 
         public User(string userName, string password)
         {
@@ -24,6 +30,19 @@ namespace BPTServer
         public void AddUser(User u)
         {
             Users.Add(u);
+        }
+
+        public static User GetUser(string userName)
+        {
+            User u = null;
+            foreach (User user in Users)
+            {
+                if (user.UserName == userName)
+                {
+                   u = user;
+                }
+            }
+            return u;
         }
     }
 }

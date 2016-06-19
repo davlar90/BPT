@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BPTServer.Poker;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -65,6 +66,9 @@ namespace BPTServer.Networking
                     swSender.WriteLine("1");
                     swSender.Flush();
                     Server.AddUser(tcpClient, currentUser);
+                    User u = new User(currentUser, currentUser);
+                    u.AddUser(u);
+                    
                 }
 
             }
@@ -98,7 +102,7 @@ namespace BPTServer.Networking
                                 break;
                         }
                     }
-                    else if (stringResponse.StartsWith("cmd"))
+                    else if ((stringResponse.StartsWith("cmd")) && (!stringResponse.Contains("¤")))
                     {
                         switch (stringResponse)
                         {
@@ -109,17 +113,75 @@ namespace BPTServer.Networking
                             case "cmdRequestPlayerList":
                                 foreach (string user in Server.connectedUsers.Keys)
                                 {
-                                    Server.SendDataToSingleClient(currentUser, "@" + user);
+                                    Server.SendDataToSingleClient(currentUser, "cmdFromServerShowPlayers¤" + user);
                                 }
+                                break;
+                            case "cmdRequestTableList":
+                                if (Table.tables.Count != 0)
+                                {
+                                    foreach (Table table in Table.tables)
+                                    {
+                                        Server.SendDataToSingleClient(currentUser, "cmdFromServerActiveTables¤" +
+                                           table.Host.UserName + "¤" + table.TableSize.ToString() + "¤" + 
+                                           table.TableID.ToString());
+                                    }
+                                }
+
                                 break;
 
                             default:
                                 break;
                         }
                     }
-                    else if (stringResponse.StartsWith("@"))
+                    else if ((stringResponse.StartsWith("cmd")) && (stringResponse.Contains("¤")))
                     {
-                        Server.SendMessage(currentUser, stringResponse);
+                        string[] splitted = stringResponse.Split('¤');
+                        switch (splitted[0])
+                        {
+                            case "cmdNewTableSixSeats":
+                                User u = User.GetUser(splitted[1]);
+                                Table t = new Table(u, 6);
+                                t.AddTableToList(t);
+                                Server.SendCommandAllClients("cmdFromServerNewTableAddedSixSeats¤" + splitted[1] +
+                                    "¤" + t.TableID.ToString());
+                                Console.WriteLine("Active Tables: " + Table.tables.Count.ToString());
+                                break;
+
+                            case "cmdJoinTable":
+                                int i = 0; // Seat Pos.
+                                User userJoin = User.GetUser(splitted[1]);
+                                int joinTableID = int.Parse(splitted[2]);
+                                Table joinTable = Table.GetTable(joinTableID);
+
+                                foreach (Seat seat in joinTable.Seats)
+                                {
+                                    if (!seat.IsOccupied)
+                                    {
+                                        seat.SeatedUser = userJoin;
+                                        seat.IsOccupied = true;
+                                        Table.tables[joinTableID].Seats[i] = seat;
+
+                                        //Now tell all connected clients to add user to seat in table with table ID.
+                                        Server.SendCommandAllClients("cmdFromServerUpdateTable¤" + splitted[2] + "¤" +
+                                                i.ToString() + "¤" + userJoin.UserName);
+                                        break;
+                                    }
+                                    i++;
+                                }
+                                
+                                break;
+
+                            case "cmdChatAll":
+                                Server.SendMessage(currentUser, splitted[1]);
+                                break;
+
+                            case "cmdChatWhisper":
+                                Server.Whisper(currentUser, splitted[1], splitted[2]);
+                                break;
+
+                            default:
+                                break;
+                        }
                     }
                 }
             }

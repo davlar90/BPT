@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Collections;
+using BPTServer.Poker;
 
 namespace BPTServer.Networking
 {
@@ -83,7 +84,7 @@ namespace BPTServer.Networking
                     if (to == userName)
                     {
                         swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-                        swSenderSender.WriteLine(from + " says: " + message);
+                        swSenderSender.WriteLine("cmdFromServerChatWhisper¤" + from + "¤ whispers: ¤" + message);
                         swSenderSender.Flush();
                         swSenderSender = null;
                     }
@@ -100,6 +101,7 @@ namespace BPTServer.Networking
 
 
         }
+
         public static void SendCommandAllClients(string command)
         {
             StreamWriter swSenderSender;
@@ -107,7 +109,7 @@ namespace BPTServer.Networking
             TcpClient[] tcpClients = new TcpClient[Server.connectedUsers.Count];
             Server.connectedUsers.Values.CopyTo(tcpClients, 0);
             command += "¤";
-            
+            string sendString = "";
             string[] splitted = command.Split('¤');
             
 
@@ -123,27 +125,36 @@ namespace BPTServer.Networking
                     }
                     else
                     {
+                        
                         switch (splitted[0])
                         {
                             case "cmdNewPlayer":
-                                swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-                                swSenderSender.WriteLine("cmdFromNewPlayer");
-                                swSenderSender.Flush();
-                                swSenderSender = null;
+                                sendString = "cmdFromNewPlayer";
                                 break;
 
                             case "cmdUserDisconnected":
-                                swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-                                swSenderSender.WriteLine("cmdUserDisconnected¤" + splitted[1]);
-                                swSenderSender.Flush();
-                                swSenderSender = null;
+                                sendString = "cmdUserDisconnected¤" + splitted[1];
                                 break;
+
+                            case "cmdFromServerNewTableAddedSixSeats":
+                                sendString = "cmdFromServerNewTableAddedSixSeats¤" + splitted[1] +
+                                    "¤" + splitted[2];
+                                break;
+
+                            case "cmdFromServerUpdateTable":
+                                sendString = "cmdFromServerUpdateTable¤" + splitted[1] + "¤" + splitted[2] +
+                                   "¤" + splitted[3];
+                                break;
+
 
                             default:
                                 break;
                         }
-                        
-                       
+
+                        swSenderSender = new StreamWriter(tcpClients[i].GetStream());
+                        swSenderSender.WriteLine(sendString);
+                        swSenderSender.Flush();
+                        swSenderSender = null;
                     }
                     
                 }
@@ -217,7 +228,7 @@ namespace BPTServer.Networking
                         continue;
                     }
                     swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-                    swSenderSender.WriteLine(from + " says: " + message);
+                    swSenderSender.WriteLine("cmdFromServerChatAll¤" + from + "¤ says: ¤" + message);
                     swSenderSender.Flush();
                     swSenderSender = null;
                 }

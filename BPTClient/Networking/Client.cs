@@ -27,8 +27,7 @@ namespace BPTClient.Networking
         public bool Connected;
         public int counterServerCommandsRecevied = -1;
 
-
-        
+        public int tableDataCounter = 0;
 
         public void Connect(string ip, int port)
         {
@@ -75,16 +74,14 @@ namespace BPTClient.Networking
 
             if (ConResponse[0] == '1')
             {
-                
-                frmMain fm = new frmMain();
-                //fm = frmMain.listFrmMain[0];
-                // update label1.Text in frmMain to "connected"
 
-                fm = frmMain.listFrmMain[0];
-
-                fm.toolTipBar.Text = " Connected";
+                frmMain fm = frmMain.listFrmMain[0];
+                fm.SetStateConnected();
+                fm.toolTipBar.Text = " Connected as: " + UserName;
                 fm.ChangeColor();
+                
                 SendMessage("cmdNewPlayer");
+
             }
             
             else 
@@ -101,8 +98,7 @@ namespace BPTClient.Networking
                 {
                     string strFromServer = srReceiver.ReadLine();
                     counterServerCommandsRecevied++;
-                    frmMain fm = new frmMain();
-                    fm = frmMain.listFrmMain[0];
+                    frmMain fm = frmMain.listFrmMain[0];
 
                     string[] splitted = strFromServer.Split('¤');
 
@@ -117,7 +113,7 @@ namespace BPTClient.Networking
                                 SendMessage("cmdRequestPlayerList");
                                 break;
 
-                            
+
 
                             default:
                                 break;
@@ -131,25 +127,94 @@ namespace BPTClient.Networking
                             case "cmdUserDisconnected":
                                 fm.RemovePlayerFromList(splitted[1]);
                                 break;
+
+                            case "cmdFromServerNewTableAddedSixSeats":
+
+                                // All clients adds table to list.
+                                int tempTableID = int.Parse(splitted[2]);
+                                User u = User.GetUser(splitted[1]);
+                                Table t = new Table(u, 6, tempTableID);
+                                t.AddTableToList(t);
+                                fm.UpDateTableList();
+                                frmMain.frmTables[tempTableID].UpdateTableSeats();
+                                break;
+
+                            case "cmdFromServerActiveTables":
+                                User tempUser = User.GetUser(splitted[1]);
+                                Table tempTable = new Table(tempUser, int.Parse(splitted[2]), int.Parse(splitted[3]));
+                                bool tableAlreadyInList = false; //Check is table already exists.
+                                if (Table.tables.Count > 0)
+                                {
+                                    for (int i = 0; i < Table.tables.Count; i++)
+                                    {
+                                        if (Table.tables[i].TableID == int.Parse(splitted[3]))
+                                        {
+                                            tableAlreadyInList = true;
+                                        }
+                                    }
+                                }
+
+                                if (tableAlreadyInList == false)
+                                {
+                                     tempTable.AddTableToList(tempTable); 
+                                }
+
+                                fm.UpDateTableList();
+                                break;
+
+                            case "cmdFromServerUpdateTable":
+                                int tableNr = int.Parse(splitted[1]);
+                                int seatNr = int.Parse(splitted[2]);
+                                User userJoinTable = User.GetUser(splitted[3]);
+
+                                Table.tables[tableNr].Seats[seatNr].SeatedUser = userJoinTable;
+                                Table.tables[tableNr].Seats[seatNr].IsOccupied = true;
+
+                                frmMain.frmTables[tableNr].UpdateTableSeats();
+
+                                break;
+
+                            case "cmdFromServerShowPlayers":
+                                fm.ShowPlayers(splitted[1]);
+                                if (!User.Users.Contains(User.GetUser(splitted[1])))
+                                {
+                                    User newUser = new User(splitted[1], "");
+                                    newUser.AddUser(newUser);
+
+                                    SendMessage("cmdRequestTableList");
+                                }
+
+
+                                break;
+
+                            case "cmdFromServerChatAll":
+                                fm.AppendTextBoxChat(splitted[1] + splitted[2] + splitted[3]);
+                                break;
+
+                            case "cmdFromServerChatWhisper":
+                                fm.AppendTextBoxChat(splitted[1] + splitted[2] + splitted[3]);
+                                break;
+
+                            case "cmdFromServerTableInformation":
+
+                                //tableID, tableSize Occupied, IsSeatOpen, PlayerName, seatNUmber(start /w 0)
+                                break;
+
                             default:
                                 break;
                         }
                     }
-                    else if (strFromServer.StartsWith("@"))
-                    {
-                        string user = strFromServer.Substring(1, strFromServer.Length - 1);
-                        fm.ShowPlayers(user);
-                    }
+
                 }
                 catch (Exception ex)
                 {
 
-                    MessageBox.Show(ex.Message);
+                    
                 }
 
             }
         }
-        private void SendMessage(string message)
+        public void SendMessage(string message)
         {
             //Cant be empty.
             if (message != "")

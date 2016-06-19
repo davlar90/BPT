@@ -14,13 +14,23 @@ namespace BPTClient
     public partial class frmMain : Form
     {
         public static List<frmMain> listFrmMain = new List<frmMain>();
-        
+        public static frmTable[] frmTables = new frmTable[30];
 
         public delegate void delSetValue(string value);
         public delegate void delNoValue();
 
 
+        public void SetStateConnected()
+        {
 
+            if (this.InvokeRequired) this.Invoke(new delNoValue(SetStateConnected));
+            else
+            {
+
+                this.btnNewTable.Enabled = true;
+                this.btnSendChat.Enabled = true;
+            }
+        }
         public void ChangeColor()
         {
 
@@ -47,6 +57,30 @@ namespace BPTClient
 
             }
         }
+        public void UpDateTableList()
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delNoValue(UpDateTableList));
+            else
+            {
+                this.listBoxTables.Items.Clear();
+                foreach (Table table in Table.tables)
+                {
+                    this.listBoxTables.Items.Add(table.Host.UserName + "'s table");
+                }
+                
+            }
+        }
+        public void AppendTextBoxChat(string value)
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delSetValue(AppendTextBoxChat), value);
+            else
+            {
+                this.tbLobbyChat.AppendText(value + "\r\n"); 
+               
+            }
+        }
         public void ShowPlayers(string value)
         {
 
@@ -66,6 +100,7 @@ namespace BPTClient
                 this.listBoxConnectedPlayers.Items.Clear();
             }
         }
+
 
         public frmMain()
         {
@@ -89,17 +124,73 @@ namespace BPTClient
 
         private void listBoxLobbys_DoubleClick(object sender, EventArgs e)
         {
-            //Join lobby
+            DialogResult result = MessageBox.Show("Join this game?",
+            "Join game", MessageBoxButtons.YesNo);
+            if (result.ToString() == "Yes")
+            {
+                bool alreadyAtThisTable = false;
+                foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
+                {
+                    if (seat.SeatedUser != null)
+                    {
+                        if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                        {
+                            alreadyAtThisTable = true;
+                        }
+                    }
+                }
+                if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
+                {
+                    Table t = Table.tables[listBoxTables.SelectedIndex];
+                    frmTable ft = new frmTable(t.TableID);
+                    ft.Show();
+                    frmTables[t.TableID] = ft;
+
+
+                    Client.listClients[0].SendMessage("cmdJoinTable¤" +
+                        User.Users[0].UserName + "¤" + t.TableID);
+                 
+
+                }
+                else
+                {
+                    MessageBox.Show("You're already sitting at this table!");
+                }
+                
+            }
         }
 
         private void btnNewLobby_Click(object sender, EventArgs e)
         {
-            //CreateLobby
+            var checkedButton = grpBoxNewTable.Controls.OfType<RadioButton>()
+                                      .FirstOrDefault(r => r.Checked);
+
+            if (checkedButton == rbTwoSeats)
+            {
+
+                tbLobbyChat.Text = Table.tables.Count.ToString();
+            }
+            else if (checkedButton == rbSixSeats)
+            {
+                frmTable ft = new frmTable(Table.tables.Count);
+                frmMain.frmTables[Table.tables.Count] = ft;
+                ft.Show();
+                Client.listClients[0].SendMessage("cmdNewTableSixSeats¤" + User.Users[0].UserName);
+                
+
+                
+            }
+            else if (checkedButton == rbNineSeats)
+            {
+
+            }
         }
 
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            btnSendChat.Enabled = false;
+            btnNewTable.Enabled = false;
         }
 
         private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
@@ -113,12 +204,103 @@ namespace BPTClient
         }
         public void OnApplicationExit(object sender, EventArgs e)
         {
-
+            if (Client.listClients.Count == 1)
             Client.listClients[0].CloseConnection("");
         }
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void btnSendChat_Click(object sender, EventArgs e)
+        {
+            if ((tbLobbyChatInput.Text != "") && (!tbLobbyChatInput.Text.Contains('¤')))
+            {
+                if (tbLobbyChatInput.Text[0] != '.')
+                {
+
+                    Client.listClients[0].SendMessage("cmdChatAll¤" + tbLobbyChatInput.Text.Trim());
+                }
+                else if (((tbLobbyChatInput.Text.StartsWith(".")) &&
+                    tbLobbyChatInput.Text.Trim().Length > 1) && ((tbLobbyChatInput.Text[1] != ' ') && tbLobbyChatInput.Text[1] != '.'))
+                {  //Chat commands here that starts with "." and is followed by word/command.
+
+                    
+                        string[] splitted = tbLobbyChatInput.Text.Trim().Split(' ');
+
+                        switch (splitted[0].ToLower())
+                        {
+                            case ".w": //Whisper
+                                int numberOfWords = splitted.Count();
+                                string[] messageArray = new string[numberOfWords - 2];
+                                Array.Copy(splitted, 2, messageArray, 0, numberOfWords - 2);
+                                string message = "";
+                                for (int i = 0; i < messageArray.Length; i++)
+                                {
+                                    message += messageArray[i] + " ";
+                                }
+                                Client.listClients[0].SendMessage("cmdChatWhisper¤" + splitted[1] + "¤" + message);
+                                tbLobbyChat.AppendText("You whispered to " + splitted[1] + ": " + message + " \r\n");
+                                break;
+
+                            case ".help":
+                                string[] commands = { ".help = Help", ".w = whisper", ".somecommand = something" };
+                                foreach (string command in commands)
+                                {
+                                    tbLobbyChat.AppendText(command + " \r\n");
+                                }
+                                break;
+
+
+
+                            default:
+                                tbLobbyChat.AppendText("Unknown command type .help for help. \r\n");
+                                break;
+                        }
+            
+
+
+                    
+
+                }
+                else if (tbLobbyChatInput.Text.StartsWith("."))
+                {
+                    Client.listClients[0].SendMessage("cmdChatAll¤" + tbLobbyChatInput.Text.Trim());
+
+                }
+                else
+                {
+                    
+                }
+            }
+            else
+            {
+                tbLobbyChat.AppendText("'¤' is an illegal character! \r\n");
+            }
+            tbLobbyChatInput.Clear();
+        } //Chat
+
+
+        private void listBoxTables_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (listBoxTables.SelectedIndex >= 0)
+            {
+                int seats = 0;
+                foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
+                {
+                    if (seat.IsOccupied == true) seats++;
+                }
+                Table t = Table.tables[listBoxTables.SelectedIndex];
+                string tableInfoString = String.Format("Host: {0} Slots: ({1}/{2}) Table ID: {3}", 
+                    t.Host.UserName, seats.ToString(), t.TableSize.ToString(), t.TableID.ToString());
+                lblTableInfo.Text = tableInfoString;
+            }
+
         }
     }
 }

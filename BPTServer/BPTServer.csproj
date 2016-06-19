@@ -46,8 +46,8 @@
     <Compile Include="Networking\Connection.cs" />
     <Compile Include="Networking\Server.cs" />
     <Compile Include="Poker\Dealer.cs" />
-    <Compile Include="Poker\Player.cs" />
-    <Compile Include="Poker\TableSeat.cs" />
+    <Compile Include="Poker\Seat.cs" />
+    <Compile Include="Poker\Table.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="User.cs" />
