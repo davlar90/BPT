@@ -35,7 +35,6 @@ namespace BPTClient
             if (this.InvokeRequired) this.Invoke(new delNoValue(SetStateConnected));
             else
             {
-
                 this.btnNewTable.Enabled = true;
                 this.btnSendChat.Enabled = true;
             }
@@ -144,45 +143,50 @@ namespace BPTClient
         private void listBoxLobbys_DoubleClick(object sender, EventArgs e)
         {
             int i = listBoxTables.SelectedIndex;
-            if (!IsTableFull[i])
+            if (i >= 0)
             {
-                if (i >= 0)
+                if (!IsTableFull[i])
                 {
-                    DialogResult result = MessageBox.Show("Join this game?", "Join game", MessageBoxButtons.YesNo);
-                    if (result.ToString() == "Yes")
+                    if (i >= 0)
                     {
-                        bool alreadyAtThisTable = false;
-                        foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
+                        DialogResult result = MessageBox.Show("Join this game?", "Join game", MessageBoxButtons.YesNo);
+                        if (result.ToString() == "Yes")
                         {
-                            if (seat.SeatedUser != null)
+                            bool alreadyAtThisTable = false;
+                            foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
                             {
-                                if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                                if (seat.SeatedUser != null)
                                 {
-                                    alreadyAtThisTable = true;
+                                    if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                                    {
+                                        alreadyAtThisTable = true;
+                                    }
                                 }
                             }
-                        }
-                        if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
-                        {
-                            Table t = Table.tables[listBoxTables.SelectedIndex];
-                            frmTable ft = new frmTable(t.TableID);
-                            ft.Show();
-                            frmTables[t.TableID] = ft;
+                            if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
+                            {
+                                Table t = Table.tables[listBoxTables.SelectedIndex];
+                                frmTable ft = new frmTable(t.TableID);
+                                ft.Show();
+                                frmTables[t.TableID] = ft;
 
 
-                        }
-                        else
-                        {
-                            MessageBox.Show("You're already sitting at this table!");
-                        }
+                            }
+                            else
+                            {
+                                MessageBox.Show("You're already sitting at this table.");
+                            }
 
+                        }
                     }
                 }
+                else
+                {
+                    MessageBox.Show("Table is full.");
+                }
             }
-            else
-            {
-                MessageBox.Show("Table is full.");
-            }
+
+
             
         }
 

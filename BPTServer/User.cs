@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BPTServer.Poker;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace BPTServer
 {
     public class User
     {
-        private static List<User> Users = new List<User>();
+        public static List<User> Users = new List<User>();
 
         private int UserID { get; set; }
         public string UserName { get; set; }
@@ -20,6 +21,7 @@ namespace BPTServer
         public bool IsSmallBlind { get; set; }
         public bool IsBigBlind { get; set; }
         public int TableSeatNumber { get; set; }
+        public Hand PlayerHand { get; set; }
 
         public User(string userName, string password)
         {

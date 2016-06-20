@@ -45,7 +45,11 @@
   <ItemGroup>
     <Compile Include="Networking\Connection.cs" />
     <Compile Include="Networking\Server.cs" />
+    <Compile Include="Poker\Card.cs" />
     <Compile Include="Poker\Dealer.cs" />
+    <Compile Include="Poker\Deck.cs" />
+    <Compile Include="Poker\Hand.cs" />
+    <Compile Include="Poker\Rules.cs" />
     <Compile Include="Poker\Seat.cs" />
     <Compile Include="Poker\Table.cs" />
     <Compile Include="Program.cs" />

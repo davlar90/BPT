@@ -294,6 +294,26 @@ namespace BPTServer.Networking
             }
         }
 
+        public static void StartGame(int tableID)
+        {
+            int numberOfPlayers = 0;
+            foreach (Seat seat in Table.tables[tableID].Seats)
+            {
+                if (seat.IsOccupied)
+                {
+                    numberOfPlayers++;
+                }
+            }
+            if (numberOfPlayers > 1)
+            {
+                Table.tables[tableID].NumberOfPlayers = numberOfPlayers;
+            }
+            else
+            {
+                Console.WriteLine("Can't start a game with less than 2 players");
+            }
+        }
+
 
     }
 }

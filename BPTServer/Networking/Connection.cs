@@ -237,7 +237,7 @@ namespace BPTServer.Networking
                                 {
                                     Server.SendCommandAllClients("cmdFromServerStartGame¤" + tableID);
 
-                                    // start the game here!
+                                    Server.StartGame(tableID);
                                 }
                                 else
                                 {
