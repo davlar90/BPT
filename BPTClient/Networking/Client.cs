@@ -113,8 +113,6 @@ namespace BPTClient.Networking
                                 SendMessage("cmdRequestPlayerList");
                                 break;
 
-
-
                             default:
                                 break;
                         }
@@ -124,6 +122,10 @@ namespace BPTClient.Networking
                     {
                         switch (splitted[0])
                         {
+                            case "cmdFromServerStartGame":
+                                frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat("Starting game...");
+                                break;
+                                
                             case "cmdUserDisconnected":
                                 fm.RemovePlayerFromList(splitted[1]);
                                 break;
@@ -136,7 +138,6 @@ namespace BPTClient.Networking
                                 Table t = new Table(u, 6, tempTableID);
                                 t.AddTableToList(t);
                                 fm.UpDateTableList();
-                                frmMain.frmTables[tempTableID].UpdateTableSeats();
                                 break;
 
                             case "cmdFromServerActiveTables":
@@ -162,15 +163,21 @@ namespace BPTClient.Networking
                                 fm.UpDateTableList();
                                 break;
 
-                            case "cmdFromServerUpdateTable":
-                                int tableNr = int.Parse(splitted[1]);
-                                int seatNr = int.Parse(splitted[2]);
-                                User userJoinTable = User.GetUser(splitted[3]);
+                            case "cmdNewPlayerJoinedTable":
+                                    int tableNr = int.Parse(splitted[1]);
+                                    int seatNr = int.Parse(splitted[2]);
+                                    User userJoinTable = User.GetUser(splitted[3]);
 
-                                Table.tables[tableNr].Seats[seatNr].SeatedUser = userJoinTable;
-                                Table.tables[tableNr].Seats[seatNr].IsOccupied = true;
-
-                                frmMain.frmTables[tableNr].UpdateTableSeats();
+                                    Table.tables[tableNr].Seats[seatNr].SeatedUser = userJoinTable;
+                                    Table.tables[tableNr].Seats[seatNr].IsOccupied = true;
+                                if (splitted[4] != null)
+                                {
+                                    if (splitted[4] == "update")
+                                    {
+                                        frmMain.frmTables[tableNr].DelUpdateTables();
+                                        frmMain.frmTables[tableNr].DelAppendToChat(splitted[3] + " joined.");
+                                    }
+                                }
 
                                 break;
 
@@ -195,9 +202,26 @@ namespace BPTClient.Networking
                                 fm.AppendTextBoxChat(splitted[1] + splitted[2] + splitted[3]);
                                 break;
 
-                            case "cmdFromServerTableInformation":
+                            case "cmdFromServerPlayersNotReady":
+                                int temp = 0;
+                                string tempPlayers = "";
+                                foreach (string player in splitted)
+                                {
+                                    if (temp > 1)
+                                    {
+                                        tempPlayers += (" [" + player + "]");
+                                    }
+                                    temp++;
+                                }
+                                frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat(
+                                    "The host tried to start the game but " + tempPlayers + " is not ready.");
+                                break;
 
-                                //tableID, tableSize Occupied, IsSeatOpen, PlayerName, seatNUmber(start /w 0)
+                            case "cmdFromServerGetThisTableInfo":
+                               
+                                    string tableInfo = String.Format("Host: {0} | Slots ({1}/{2})", splitted[1],
+                                                     splitted[2], splitted[3]);
+                                    fm.TableInfolblTableInfo(tableInfo);
                                 break;
 
                             default:
@@ -206,7 +230,7 @@ namespace BPTClient.Networking
                     }
 
                 }
-                catch (Exception ex)
+                catch 
                 {
 
                     

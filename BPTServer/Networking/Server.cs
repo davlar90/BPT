@@ -108,12 +108,10 @@ namespace BPTServer.Networking
 
             TcpClient[] tcpClients = new TcpClient[Server.connectedUsers.Count];
             Server.connectedUsers.Values.CopyTo(tcpClients, 0);
-            command += "¤";
-            string sendString = "";
-            string[] splitted = command.Split('¤');
-            
-
-            int tempConnPlayers = connectedUsers.Count - 1;
+            //command += "¤";
+            //string sendString = "";
+            //string[] splitted = command.Split('¤');
+            // int tempConnPlayers = connectedUsers.Count - 1;
 
             for (int i = 0; i < tcpClients.Length; i++)
             {
@@ -126,33 +124,33 @@ namespace BPTServer.Networking
                     else
                     {
                         
-                        switch (splitted[0])
-                        {
-                            case "cmdNewPlayer":
-                                sendString = "cmdFromNewPlayer";
-                                break;
+                        //switch (splitted[0])
+                        //{
+                        //    case "cmdFromNewPlayer":
+                        //        sendString = "cmdFromNewPlayer";
+                        //        break;
 
-                            case "cmdUserDisconnected":
-                                sendString = "cmdUserDisconnected¤" + splitted[1];
-                                break;
+                        //    case "cmdUserDisconnected":
+                        //        sendString = "cmdUserDisconnected¤" + splitted[1];
+                        //        break;
 
-                            case "cmdFromServerNewTableAddedSixSeats":
-                                sendString = "cmdFromServerNewTableAddedSixSeats¤" + splitted[1] +
-                                    "¤" + splitted[2];
-                                break;
+                        //    case "cmdFromServerNewTableAddedSixSeats":
+                        //        sendString = "cmdFromServerNewTableAddedSixSeats¤" + splitted[1] +
+                        //            "¤" + splitted[2];
+                        //        break;
 
-                            case "cmdFromServerUpdateTable":
-                                sendString = "cmdFromServerUpdateTable¤" + splitted[1] + "¤" + splitted[2] +
-                                   "¤" + splitted[3];
-                                break;
+                        //    case "cmdFromServerUpdateTable":
+                        //        sendString = "cmdFromServerUpdateTable¤" + splitted[1] + "¤" + splitted[2] +
+                        //           "¤" + splitted[3];
+                        //        break;
 
 
-                            default:
-                                break;
-                        }
+                        //    default:
+                        //        break;
+                        //}
 
                         swSenderSender = new StreamWriter(tcpClients[i].GetStream());
-                        swSenderSender.WriteLine(sendString);
+                        swSenderSender.WriteLine(command);
                         swSenderSender.Flush();
                         swSenderSender = null;
                     }

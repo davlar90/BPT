@@ -14,6 +14,8 @@ namespace BPTServer
         public string UserName { get; set; }
         private string Password { get; set; }
 
+        public bool IsReadyToStart { get; set; }
+
         public int Chips { get; set; }
         public bool IsDealer { get; set; }
         public bool IsSmallBlind { get; set; }

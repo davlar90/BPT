@@ -81,6 +81,16 @@ namespace BPTClient
                
             }
         }
+        public void TableInfolblTableInfo(string value)
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delSetValue(TableInfolblTableInfo), value);
+            else
+            {
+
+                this.lblTableInfo.Text = value;
+            }
+        }
         public void ShowPlayers(string value)
         {
 
@@ -124,39 +134,37 @@ namespace BPTClient
 
         private void listBoxLobbys_DoubleClick(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Join this game?",
-            "Join game", MessageBoxButtons.YesNo);
-            if (result.ToString() == "Yes")
+            if (listBoxTables.SelectedIndex >= 0)
             {
-                bool alreadyAtThisTable = false;
-                foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
+                DialogResult result = MessageBox.Show("Join this game?", "Join game", MessageBoxButtons.YesNo);
+                if (result.ToString() == "Yes")
                 {
-                    if (seat.SeatedUser != null)
+                    bool alreadyAtThisTable = false;
+                    foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
                     {
-                        if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                        if (seat.SeatedUser != null)
                         {
-                            alreadyAtThisTable = true;
+                            if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                            {
+                                alreadyAtThisTable = true;
+                            }
                         }
                     }
-                }
-                if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
-                {
-                    Table t = Table.tables[listBoxTables.SelectedIndex];
-                    frmTable ft = new frmTable(t.TableID);
-                    ft.Show();
-                    frmTables[t.TableID] = ft;
+                    if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
+                    {
+                        Table t = Table.tables[listBoxTables.SelectedIndex];
+                        frmTable ft = new frmTable(t.TableID);
+                        ft.Show();
+                        frmTables[t.TableID] = ft;
+                        
+                        
+                    }
+                    else
+                    {
+                        MessageBox.Show("You're already sitting at this table!");
+                    }
 
-
-                    Client.listClients[0].SendMessage("cmdJoinTable¤" +
-                        User.Users[0].UserName + "¤" + t.TableID);
-                 
-
                 }
-                else
-                {
-                    MessageBox.Show("You're already sitting at this table!");
-                }
-                
             }
         }
 
@@ -174,11 +182,11 @@ namespace BPTClient
             {
                 frmTable ft = new frmTable(Table.tables.Count);
                 frmMain.frmTables[Table.tables.Count] = ft;
-                ft.Show();
+                
                 Client.listClients[0].SendMessage("cmdNewTableSixSeats¤" + User.Users[0].UserName);
-                
 
-                
+                ft.Show();
+
             }
             else if (checkedButton == rbNineSeats)
             {
@@ -288,17 +296,11 @@ namespace BPTClient
 
         private void listBoxTables_MouseClick(object sender, MouseEventArgs e)
         {
+            
             if (listBoxTables.SelectedIndex >= 0)
             {
-                int seats = 0;
-                foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
-                {
-                    if (seat.IsOccupied == true) seats++;
-                }
-                Table t = Table.tables[listBoxTables.SelectedIndex];
-                string tableInfoString = String.Format("Host: {0} Slots: ({1}/{2}) Table ID: {3}", 
-                    t.Host.UserName, seats.ToString(), t.TableSize.ToString(), t.TableID.ToString());
-                lblTableInfo.Text = tableInfoString;
+                Client.listClients[0].SendMessage("cmdGetThisTableInfo¤" +
+                    listBoxTables.SelectedIndex);
             }
 
         }

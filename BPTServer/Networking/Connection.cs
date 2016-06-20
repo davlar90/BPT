@@ -86,7 +86,7 @@ namespace BPTServer.Networking
                     {
                         Console.WriteLine("StringResponse is null");
                         Server.RemoveUser(tcpClient);
-                        break;      // TEST BREAK I ADDED, DONT KNOW IF THIS IS GOOD OR NOT YET.
+                        break;     
                     }
                     else if (stringResponse.StartsWith("."))
                     {
@@ -107,8 +107,10 @@ namespace BPTServer.Networking
                         switch (stringResponse)
                         {
                             case "cmdNewPlayer":
-                                    Server.SendCommandAllClients(stringResponse);
+                                    Server.SendCommandAllClients("cmdFromNewPlayer");
                                 break;
+
+                           
 
                             case "cmdRequestPlayerList":
                                 foreach (string user in Server.connectedUsers.Keys)
@@ -144,31 +146,22 @@ namespace BPTServer.Networking
                                 t.AddTableToList(t);
                                 Server.SendCommandAllClients("cmdFromServerNewTableAddedSixSeats¤" + splitted[1] +
                                     "¤" + t.TableID.ToString());
-                                Console.WriteLine("Active Tables: " + Table.tables.Count.ToString());
+                                Console.WriteLine("Active Tables: " + Table.tables.Count.ToString()
+                                    + " " + t.Seats[0].SeatedUser.UserName);
                                 break;
 
-                            case "cmdJoinTable":
-                                int i = 0; // Seat Pos.
+                            case "cmdSit":
+                                int seatPos = int.Parse(splitted[3]);
                                 User userJoin = User.GetUser(splitted[1]);
                                 int joinTableID = int.Parse(splitted[2]);
-                                Table joinTable = Table.GetTable(joinTableID);
 
-                                foreach (Seat seat in joinTable.Seats)
-                                {
-                                    if (!seat.IsOccupied)
-                                    {
-                                        seat.SeatedUser = userJoin;
-                                        seat.IsOccupied = true;
-                                        Table.tables[joinTableID].Seats[i] = seat;
+                                Table.tables[joinTableID].Seats[seatPos].SeatedUser = userJoin;
+                                Table.tables[joinTableID].Seats[seatPos].IsOccupied = true;
 
-                                        //Now tell all connected clients to add user to seat in table with table ID.
-                                        Server.SendCommandAllClients("cmdFromServerUpdateTable¤" + splitted[2] + "¤" +
-                                                i.ToString() + "¤" + userJoin.UserName);
-                                        break;
-                                    }
-                                    i++;
-                                }
-                                
+
+                                //Now tell all connected clients to add user to seat in table with table ID.
+                                Server.SendCommandAllClients("cmdNewPlayerJoinedTable¤" + splitted[2] + "¤" +
+                                                seatPos.ToString() + "¤" + userJoin.UserName + "¤update");
                                 break;
 
                             case "cmdChatAll":
@@ -179,6 +172,113 @@ namespace BPTServer.Networking
                                 Server.Whisper(currentUser, splitted[1], splitted[2]);
                                 break;
 
+                            case "cmdSyncTables":
+                                int occupiedSeats = 0;
+                                foreach (Seat seat in Table.tables[int.Parse(splitted[1])].Seats)
+                                {
+                                 
+                                    if (seat.IsOccupied)
+                                    {
+                                        Server.SendDataToSingleClient(currentUser, "cmdNewPlayerJoinedTable¤" +
+                                        splitted[1] + "¤" + seat.SeatNumber + "¤" + seat.SeatedUser.UserName);
+                                        occupiedSeats++;
+                                    }
+                                   
+                                }
+                                if (occupiedSeats == 0)
+                                {
+                                    Console.WriteLine("No taken seats");
+                                }
+                                break;
+
+                            case "cmdIsUserReadyToStart":
+                                if (splitted[1] == "yes")
+                                {
+                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].
+                                        SeatedUser.IsReadyToStart = true;
+                                    Console.WriteLine("Player: " + Table.tables[(int.Parse(splitted[2]))].Seats[int.Parse(
+                                             splitted[3])].SeatedUser.UserName + " is ready to start");
+
+                                }
+                                else if (splitted[1] == "no")
+                                {
+                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].
+                                        SeatedUser.IsReadyToStart = false;
+                                    Console.WriteLine("Player: " + Table.tables[(int.Parse(splitted[2]))].Seats[int.Parse(
+                                             splitted[3])].SeatedUser.UserName + " is NOT ready to start");
+                                }
+
+                                break;
+
+                            case "cmdTryStartGame":
+                                int tableID = int.Parse(splitted[1]);
+
+                                int numberOfReadys = 0;
+                                int numberOfPlayers = 0;
+                                List<string> notReadyPlayers = new List<string>();
+
+                                foreach (Seat seat in Table.tables[tableID].Seats)
+                                {
+                                    if (seat.IsOccupied)
+                                    {
+                                        if (seat.SeatedUser.IsReadyToStart)
+                                        {
+                                            numberOfReadys++;
+                                        }
+                                        else
+                                        {
+                                            notReadyPlayers.Add(seat.SeatedUser.UserName);
+                                        }
+                                        numberOfPlayers++;
+                                    }
+                                }
+
+                                if (numberOfPlayers == numberOfReadys)
+                                {
+                                    Server.SendCommandAllClients("cmdFromServerStartGame¤" + tableID);
+
+                                    // start the game here!
+                                }
+                                else
+                                {
+                                    string playersNotReady = "";
+                                    foreach (string player in notReadyPlayers)
+                                    {
+                                        playersNotReady += ("¤" + player);
+                                    }
+                                    if (notReadyPlayers.Count == 0)
+                                    {
+                                        playersNotReady = "¤";
+                                    }
+                                    Server.SendCommandAllClients("cmdFromServerPlayersNotReady¤" +
+                                        tableID + playersNotReady);
+                                }
+                                break;
+                                
+                            case "cmdGetThisTableInfo":
+                                Table tempTable = Table.tables[int.Parse(splitted[1])];
+                                string response = "";
+                                    int avaibleSeats = 0;
+                                    foreach (Seat seat in tempTable.Seats)
+                                    {
+                                        if (seat.IsOccupied)
+                                    { 
+
+                                        if (seat.IsOccupied) avaibleSeats++;
+                                        Server.SendDataToSingleClient(currentUser, "cmdNewPlayerJoinedTable¤" +
+                                        splitted[1] + "¤" + seat.SeatNumber + "¤" + seat.SeatedUser.UserName);
+                                    }
+                                    }
+                                    response = "cmdFromServerGetThisTableInfo¤" + tempTable.Host.UserName +
+                                    "¤" + avaibleSeats + "¤" + tempTable.Seats.Count();
+                                    Server.SendDataToSingleClient(currentUser, response);
+
+                                
+                                    
+                                
+
+                                break;
+
                             default:
                                 break;
                         }
@@ -187,7 +287,7 @@ namespace BPTServer.Networking
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message, " Removed user: " + tcpClient.ToString());
+                Console.WriteLine(ex.Message + " Removed user: " + currentUser);
 
                 Server.RemoveUser(tcpClient);
 
