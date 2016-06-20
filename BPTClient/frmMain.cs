@@ -15,11 +15,20 @@ namespace BPTClient
     {
         public static List<frmMain> listFrmMain = new List<frmMain>();
         public static frmTable[] frmTables = new frmTable[30];
+        public static bool[] IsTableFull = new bool[30]; //adds full tables to this list.
 
         public delegate void delSetValue(string value);
         public delegate void delNoValue();
 
+        public void DelSetFullTable(string index)
+        {
 
+            if (this.InvokeRequired) this.Invoke(new delSetValue(DelSetFullTable), index);
+            else
+            {
+                IsTableFull[int.Parse(index)] = true;
+            }
+        }
         public void SetStateConnected()
         {
 
@@ -134,38 +143,47 @@ namespace BPTClient
 
         private void listBoxLobbys_DoubleClick(object sender, EventArgs e)
         {
-            if (listBoxTables.SelectedIndex >= 0)
+            int i = listBoxTables.SelectedIndex;
+            if (!IsTableFull[i])
             {
-                DialogResult result = MessageBox.Show("Join this game?", "Join game", MessageBoxButtons.YesNo);
-                if (result.ToString() == "Yes")
+                if (i >= 0)
                 {
-                    bool alreadyAtThisTable = false;
-                    foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
+                    DialogResult result = MessageBox.Show("Join this game?", "Join game", MessageBoxButtons.YesNo);
+                    if (result.ToString() == "Yes")
                     {
-                        if (seat.SeatedUser != null)
+                        bool alreadyAtThisTable = false;
+                        foreach (Seat seat in Table.tables[listBoxTables.SelectedIndex].Seats)
                         {
-                            if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                            if (seat.SeatedUser != null)
                             {
-                                alreadyAtThisTable = true;
+                                if (seat.SeatedUser.UserName == User.Users[0].UserName)
+                                {
+                                    alreadyAtThisTable = true;
+                                }
                             }
                         }
-                    }
-                    if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
-                    {
-                        Table t = Table.tables[listBoxTables.SelectedIndex];
-                        frmTable ft = new frmTable(t.TableID);
-                        ft.Show();
-                        frmTables[t.TableID] = ft;
-                        
-                        
-                    }
-                    else
-                    {
-                        MessageBox.Show("You're already sitting at this table!");
-                    }
+                        if ((listBoxTables.SelectedItem != null) && (!alreadyAtThisTable))
+                        {
+                            Table t = Table.tables[listBoxTables.SelectedIndex];
+                            frmTable ft = new frmTable(t.TableID);
+                            ft.Show();
+                            frmTables[t.TableID] = ft;
 
+
+                        }
+                        else
+                        {
+                            MessageBox.Show("You're already sitting at this table!");
+                        }
+
+                    }
                 }
             }
+            else
+            {
+                MessageBox.Show("Table is full.");
+            }
+            
         }
 
         private void btnNewLobby_Click(object sender, EventArgs e)

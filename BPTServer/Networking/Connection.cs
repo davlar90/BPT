@@ -194,18 +194,18 @@ namespace BPTServer.Networking
                             case "cmdIsUserReadyToStart":
                                 if (splitted[1] == "yes")
                                 {
-                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].
-                                        SeatedUser.IsReadyToStart = true;
+                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].IsReadyToStart = true;
                                     Console.WriteLine("Player: " + Table.tables[(int.Parse(splitted[2]))].Seats[int.Parse(
-                                             splitted[3])].SeatedUser.UserName + " is ready to start");
+                                             splitted[3])].SeatedUser.UserName +
+                                             " on table " + Table.tables[int.Parse(splitted[2])].TableID + " is ready to start");
 
                                 }
                                 else if (splitted[1] == "no")
                                 {
-                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].
-                                        SeatedUser.IsReadyToStart = false;
+                                    Table.tables[int.Parse(splitted[2])].Seats[int.Parse(splitted[3])].IsReadyToStart = false;
                                     Console.WriteLine("Player: " + Table.tables[(int.Parse(splitted[2]))].Seats[int.Parse(
-                                             splitted[3])].SeatedUser.UserName + " is NOT ready to start");
+                                             splitted[3])].SeatedUser.UserName +
+                                             " on table " + Table.tables[int.Parse(splitted[2])].TableID + " is NOT ready to start");
                                 }
 
                                 break;
@@ -221,7 +221,7 @@ namespace BPTServer.Networking
                                 {
                                     if (seat.IsOccupied)
                                     {
-                                        if (seat.SeatedUser.IsReadyToStart)
+                                        if (seat.IsReadyToStart)
                                         {
                                             numberOfReadys++;
                                         }
@@ -270,7 +270,7 @@ namespace BPTServer.Networking
                                     }
                                     }
                                     response = "cmdFromServerGetThisTableInfo¤" + tempTable.Host.UserName +
-                                    "¤" + avaibleSeats + "¤" + tempTable.Seats.Count();
+                                    "¤" + avaibleSeats + "¤" + tempTable.Seats.Count() + "¤" + splitted[1];
                                     Server.SendDataToSingleClient(currentUser, response);
 
                                 

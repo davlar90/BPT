@@ -124,6 +124,7 @@ namespace BPTClient.Networking
                         {
                             case "cmdFromServerStartGame":
                                 frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat("Starting game...");
+                                frmMain.frmTables[int.Parse(splitted[1])].DelStartingGame();
                                 break;
                                 
                             case "cmdUserDisconnected":
@@ -214,7 +215,7 @@ namespace BPTClient.Networking
                                     temp++;
                                 }
                                 frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat(
-                                    "The host tried to start the game but " + tempPlayers + " is not ready.");
+                                    "The host tried to start the game but" + tempPlayers + " is not ready.");
                                 break;
 
                             case "cmdFromServerGetThisTableInfo":
@@ -222,6 +223,10 @@ namespace BPTClient.Networking
                                     string tableInfo = String.Format("Host: {0} | Slots ({1}/{2})", splitted[1],
                                                      splitted[2], splitted[3]);
                                     fm.TableInfolblTableInfo(tableInfo);
+                                if (int.Parse(splitted[2]) == int.Parse(splitted[3]))
+                                {
+                                    frmMain.listFrmMain[0].DelSetFullTable(splitted[4]);
+                                }
                                 break;
 
                             default:

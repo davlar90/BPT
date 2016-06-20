@@ -12,6 +12,7 @@ namespace BPTServer.Poker
         public User SeatedUser { get; set; }
         public bool IsOccupied { get; set; }
         public bool IsOpen { get; set; }
+        public bool IsReadyToStart { get; set; }
 
         public Seat(int seatNumber, User seatedUser, bool isOccupied, bool isOpen)
         {

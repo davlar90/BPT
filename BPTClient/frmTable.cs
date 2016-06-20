@@ -28,11 +28,11 @@ namespace BPTClient
         private void frmTable_Load(object sender, EventArgs e)
         {
 
-            GetTableDataNewTable();
-            
             btnStartGame.Visible = false;
             cbReady.Visible = false;
-            
+
+            GetTableDataNewTable();
+
         }
 
         public void AppendToStatusBox(string text)
@@ -66,6 +66,31 @@ namespace BPTClient
                 AppendToChat(text);
             }
         }
+        public void DelAppendToTableLog(string text)
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delSetValue(DelAppendToTableLog), text);
+            else
+            {
+                AppendToStatusBox(text);
+            }
+        }
+        public void DelStartingGame()
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delNoValue(StartingGame));
+            else
+            {
+                StartingGame();
+            }
+        }
+
+        private void StartingGame()
+        {
+            btnStartGame.Visible = false;
+            cbReady.Visible = false;
+
+        }
 
         public void DelUpdateTables()
         {
@@ -88,7 +113,6 @@ namespace BPTClient
                 {
                     if (User.Users[0].UserName == Table.tables[TableID].Host.UserName)
                     {
-                        AppendToStatusBox(seat.SeatedUser.UserName + " created table.");
                         btnStartGame.Enabled = true;
                         btnStartGame.Visible = true;
                         cbReady.Visible = true;
@@ -110,8 +134,9 @@ namespace BPTClient
         private void PlayerSitDown(string seat)
         {
             Client.listClients[0].SendMessage("cmdSit¤" +
-   User.Users[0].UserName + "¤" + TableID + "¤" + seat);
+                    User.Users[0].UserName + "¤" + TableID + "¤" + seat);
             cbReady.Visible = true;
+            UserTakeSeat();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -187,25 +212,16 @@ namespace BPTClient
             }
             if (cbReady.Checked)
             {
-                Table.tables[TableID].Seats[seatNr].SeatedUser.IsReadyToStart = true;
+                Table.tables[TableID].Seats[seatNr].IsReadyToStart = true;
 
                 Client.listClients[0].SendMessage("cmdIsUserReadyToStart¤yes¤" + TableID.ToString() +
                     "¤" + seatNr.ToString());
             }
             else
             {
-                Table.tables[TableID].Seats[seatNr].SeatedUser.IsReadyToStart = false;
+                Table.tables[TableID].Seats[seatNr].IsReadyToStart = false;
                 Client.listClients[0].SendMessage("cmdIsUserReadyToStart¤no¤" + TableID.ToString() +
                     "¤" + seatNr.ToString());
-            }
-
-            foreach (Seat seat in Table.tables[TableID].Seats)
-            {
-                if (seat.SeatedUser != null)
-                {
-                    AppendToChat(seat.SeatedUser.UserName + seat.SeatedUser.IsReadyToStart.ToString());
-                    
-                }
             }
         }
     }
