@@ -15,6 +15,7 @@ namespace BPTServer.Poker
         public Card TableCardTwo { get; set; }
         public Card TableCardThree { get; set; }
 
+        public string NameOfHand { get; set; }
         public int HandsValue { get; set; }
 
         public Card[] ListHand { get; set; } = new Card[5];

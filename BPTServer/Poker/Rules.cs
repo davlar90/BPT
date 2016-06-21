@@ -8,7 +8,32 @@ namespace BPTServer.Poker
 {
     class Rules     //Rules for checking hand.
     {
-        public static int GetHandsValue(Hand h)
+        public static List<User> CheckWinners(Table t)
+        {
+            List<User> players = new List<User>();
+            List<User> winners = new List<User>();
+            for (int i = 0; i < t.Seats.Count(); i++)
+            {
+                if (t.Seats[i].IsOccupied)
+                {
+                    t.Seats[i].SeatedUser.PlayerHand = GetHandsValue(t.Seats[i].SeatedUser.PlayerHand);
+                    players.Add(t.Seats[i].SeatedUser);
+                }
+            }
+            List<User> sortedPlayers = players.OrderByDescending(o => o.PlayerHand.HandsValue).ToList();
+            int numberOfPlayers = sortedPlayers.Count();
+            winners.Add(sortedPlayers[0]);
+            for (int i = 1; i < numberOfPlayers - 1; i++)
+            {
+                if (sortedPlayers[i].PlayerHand.HandsValue == sortedPlayers[0].PlayerHand.HandsValue)
+                {
+                    winners.Add(sortedPlayers[i]);
+                }
+            }
+            return winners;
+        }
+
+        public static Hand GetHandsValue(Hand h)
         {
             /*      Points for each hand:
              *      Straight Flush = 900.
@@ -22,27 +47,35 @@ namespace BPTServer.Poker
              *      High card      = Each high card gets it's own number as points.
              *      */
             List<Card> sortedListHand = h.ListHand.OrderByDescending(o => o.Value).ToList();
-            int handValue = 0;
+            
             if ((CheckHandForStraight(h)) && (CheckHandForFlush(h)))
             {
-                
-                handValue = 900;
+                h.NameOfHand = "Straight Flush. " + sortedListHand[0].Name + " to " + sortedListHand[4].Name;
+                h.HandsValue = 900 + sortedListHand[0].Value;
+                if (sortedListHand[0].Value == 14)
+                {
+                    h.NameOfHand = "Royal Straight Flush.";
+                    h.HandsValue = 914;
+                }
             }
             else if (CheckHandForFlush(h))
             {
-                handValue = 600 + sortedListHand[0].Value;
+                h.NameOfHand = "Flush of " + h.ListHand[0].Suit + ".";
+                h.HandsValue = 600 + sortedListHand[0].Value; ;
             }
             else if (CheckHandForStraight(h))
             {
-                handValue = 500 + sortedListHand[0].Value;
+                h.NameOfHand = "Straight " + sortedListHand[0].Name + " to " + sortedListHand[4].Name + ".";
+                h.HandsValue = 500 + sortedListHand[0].Value;
             }
             else
             {
-                handValue = CheckHandSameValuedCards(h);
+
+                h = CheckHandSameValuedCards(h);
             }
 
 
-            return handValue;
+            return h;
         }
 
         public static bool CheckHandForStraight(Hand h)
@@ -63,9 +96,10 @@ namespace BPTServer.Poker
             return isStraight;
         }
 
-        public static int CheckHandSameValuedCards(Hand h)
+        public static Hand CheckHandSameValuedCards(Hand h)
         {
             int handsValue = 0;
+            string nameHand = "";
 
             List<List<Card>> cardsCheckedList = CheckCardsOfSameValue(h);
             List<Card> cardsChecked = cardsCheckedList[0];
@@ -78,14 +112,13 @@ namespace BPTServer.Poker
                 if(sameValueCount == 2) //Single Pair
                 {
                     handsValue += 200;
-
-                    Console.WriteLine("You have a pair of " + cardsChecked[0].Name);
+                    nameHand = "Pair of " + cardsChecked[0].Name + ".";
                 }
                 else if (sameValueCount == 3)
                 {
                     //three of a kind
+                    nameHand = "Three of a kind of " + cardsChecked[0].Name + ".";
                     handsValue += 400;
-                    Console.WriteLine("You have three of a kid of " + cardsChecked[0].Name);
 
                 }
                 else if (sameValueCount == 4)
@@ -93,22 +126,21 @@ namespace BPTServer.Poker
                     if ((cardsChecked[0].Value == cardsChecked[1].Value) && 
                         (cardsChecked[0].Value == cardsChecked[2].Value))
                     {   // Four of a kind
+                        nameHand = "Four of kind of " + cardsChecked[0].Name + ".";
                         handsValue += 800;
-                        Console.WriteLine("You four of a kind of " + cardsChecked[0].Name);
                     }
                     else
                     {
                         if (cardsChecked[0].Value == cardsChecked[1].Value)  //Twopair
                         {
+                            nameHand = "Two pairs of " + cardsChecked[0].Name + " and " + cardsChecked[2].Name + ".";
                             handsValue += 300;
-                            Console.WriteLine("You have two pairs of " + cardsChecked[0].Name +
-                                " " + cardsChecked[2].Name);
                         }
                         else // Twopair
                         {
+                            nameHand = "Two pairs of " + cardsChecked[0].Name + " and " + cardsChecked[1].Name + ".";
+
                             handsValue += 300;
-                            Console.WriteLine("You have two pairs of " + cardsChecked[0].Name +
-                                " " + cardsChecked[1].Name);
                         }
                     }
                 }
@@ -133,15 +165,15 @@ namespace BPTServer.Poker
                     }
                     if (counter == 3) // Full house. First card in list is the 3pair
                     {
+                        nameHand = "Full house with three of " + cardsChecked[0].Name +
+                            " and two of " + value + ".";
                         handsValue += 700;
-                        Console.WriteLine("You have a full house. Three of " + cardsChecked[0].Name +
-                            " and two of " + value);
                     }
                     else // Full House. 
                     {
+                        nameHand = "Full house with three of " + value +
+                            " and two of " + cardsChecked[0].Name + ".";
                         handsValue += 700;
-                        Console.WriteLine("You have a full house. Two of " + cardsChecked[0].Name +
-                            " and three of " + value);
                     }
 
 
@@ -151,22 +183,22 @@ namespace BPTServer.Poker
 
                 }
             }
-            if (cardsCheckedList.Count() == 2)
+            string highCards = "";
+            if (cardsCheckedList.Count() == 2) //If there is two lists in this list then there are highcards.
             {
+                highCards = " High card(s):";
                 List<Card> highCardList = cardsCheckedList[1];
+
                 foreach (Card card in highCardList)
                 {
-                    Console.WriteLine("Highcard('s): " + card.Value);
+                    highCards += (" " + card.Name);
                     handsValue += card.Value;
                 }
             }
-
-            return handsValue;
-        }
-
-        private bool CheckStraight(Hand h)
-        {
-            throw new NotImplementedException();
+            
+            h.HandsValue = handsValue;
+            h.NameOfHand = nameHand + highCards;
+            return h;
         }
 
         private static List<List<Card>> CheckCardsOfSameValue(Hand h)
@@ -318,13 +350,6 @@ namespace BPTServer.Poker
             listOfCardLists.Add(sortedHighCardList);
             return listOfCardLists;
 
-        }
-
-
-
-        private static bool CheckStraightFlush(Hand h)
-        {
-            throw new NotImplementedException();
         }
 
         private static bool CheckHandForFlush(Hand h)
