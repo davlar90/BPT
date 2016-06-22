@@ -11,7 +11,8 @@ namespace BPTServer.Poker
     {
         public static List<Dealer> dealers = new List<Dealer>();
         public Card[] DealersDeck { get; set; }
-        public int NumberOfHandsDealed { get; set; }
+        public Card[] TempDeck { get; set; }
+        public int NumberOfHandsDealt { get; set; }
         public int DealerID { get; set; }
 
         public static Random rnd = new Random();
@@ -46,6 +47,8 @@ namespace BPTServer.Poker
 
         public void DealCards()
         {
+            NumberOfHandsDealt++;
+            TempDeck = DealersDeck;
             List<User> users = new List<User>();
             int counter = 0;
             int smallBlindPos = -99; 
@@ -72,13 +75,13 @@ namespace BPTServer.Poker
             {
                 if (i < users.Count())
                 {
-                    users[i].PlayerHand.GivenCardOne = DealersDeck[DealersDeck.Length - 1];
+                    users[i].PlayerHand.GivenCardOne = TempDeck[TempDeck.Length - 1];
 
                     RemoveOneCardFromDeck();
                 }
                 else
                 {
-                    users[elseCounter].PlayerHand.GivenCardOne = DealersDeck[DealersDeck.Length - 1];
+                    users[elseCounter].PlayerHand.GivenCardOne = TempDeck[TempDeck.Length - 1];
                     RemoveOneCardFromDeck();
                     elseCounter++;
                 }
@@ -88,13 +91,13 @@ namespace BPTServer.Poker
             {
                 if (i < users.Count())
                 {
-                    users[i].PlayerHand.GivenCardTwo = DealersDeck[DealersDeck.Length - 1];
+                    users[i].PlayerHand.GivenCardTwo = TempDeck[TempDeck.Length - 1];
 
                     RemoveOneCardFromDeck();
                 }
                 else
                 {
-                    users[elseCounter].PlayerHand.GivenCardTwo = DealersDeck[DealersDeck.Length - 1];
+                    users[elseCounter].PlayerHand.GivenCardTwo = TempDeck[TempDeck.Length - 1];
                     RemoveOneCardFromDeck();
                     elseCounter++;
                 }
@@ -107,11 +110,32 @@ namespace BPTServer.Poker
             }
 
         }
+        public void DealFlop()
+        {
+            RemoveOneCardFromDeck(); //Burn card
+            Table.tables[DealerID].TablesCards[0] = TempDeck[TempDeck.Length - 1];
+            RemoveOneCardFromDeck();
+            Table.tables[DealerID].TablesCards[1] = TempDeck[TempDeck.Length - 1];
+            RemoveOneCardFromDeck();
+            Table.tables[DealerID].TablesCards[2] = TempDeck[TempDeck.Length - 1];
+            RemoveOneCardFromDeck();
+        }
+        public void DealTurn()
+        {
+            RemoveOneCardFromDeck();
+            Table.tables[DealerID].TablesCards[3] = TempDeck[TempDeck.Length - 1];
+            RemoveOneCardFromDeck();
+        }
+        public void DealRiver()
+        {
+            RemoveOneCardFromDeck();
+            Table.tables[DealerID].TablesCards[4] = TempDeck[TempDeck.Length - 1];
+            RemoveOneCardFromDeck();
+        }
 
         public void RemoveOneCardFromDeck()
         {
-            int numIndex = DealersDeck.Count() - 1;
-            DealersDeck = DealersDeck.Where((val, idx) => idx != numIndex).ToArray();
+            TempDeck = TempDeck.Take(TempDeck.Count() - 1).ToArray();
         }
     }
 }

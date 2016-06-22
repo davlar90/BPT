@@ -8,6 +8,20 @@ namespace BPTServer.Poker
 {
     class Rules     //Rules for checking hand.
     {
+        public static void GetBestPossibleHand(Table t, Hand h)
+        {
+            Hand bigHand = new Hand();
+
+            for (int i = 0; i < 5; i++)
+            {
+                bigHand.TablesHand[i] = t.TablesCards[i];
+            }
+
+            bigHand.GivenCardOne = h.GivenCardOne;
+            bigHand.GivenCardTwo = h.GivenCardTwo;
+
+        }
+
         public static List<User> CheckWinners(Table t)
         {
             List<User> players = new List<User>();
@@ -23,7 +37,7 @@ namespace BPTServer.Poker
             List<User> sortedPlayers = players.OrderByDescending(o => o.PlayerHand.HandsValue).ToList();
             int numberOfPlayers = sortedPlayers.Count();
             winners.Add(sortedPlayers[0]);
-            for (int i = 1; i < numberOfPlayers - 1; i++)
+            for (int i = 1; i < numberOfPlayers; i++)
             {
                 if (sortedPlayers[i].PlayerHand.HandsValue == sortedPlayers[0].PlayerHand.HandsValue)
                 {
@@ -382,7 +396,7 @@ namespace BPTServer.Poker
 
             }
 
-            if ((clubs == 5) || (hearts == 5) || (diamonds == 5) || (spades == 5))
+            if ((clubs > 4) || (hearts > 4) || (diamonds > 4) || (spades > 4))
             {
                 hasFlush = true;
             }

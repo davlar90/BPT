@@ -16,7 +16,7 @@ namespace BPTServer.Poker
         public Seat[] Seats { get; set; }
         public int NumberOfPlayers { get; set; }
 
-
+        public Card[] TablesCards { get; set; } = new Card[5];
 
         public Table(User host, int tableSize)
         {
