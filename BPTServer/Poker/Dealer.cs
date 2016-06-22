@@ -43,12 +43,14 @@ namespace BPTServer.Poker
         {
             Card[] DealersDeckShuffle = DealersDeck.OrderBy(x => rnd.Next()).ToArray();
             DealersDeck = DealersDeckShuffle;
+
+            TempDeck = DealersDeck;
+
         }
 
         public void DealCards()
         {
             NumberOfHandsDealt++;
-            TempDeck = DealersDeck;
             List<User> users = new List<User>();
             int counter = 0;
             int smallBlindPos = -99; 
@@ -102,11 +104,11 @@ namespace BPTServer.Poker
                     elseCounter++;
                 }
             }
-            int c = 0;
-            foreach (Seat seat in Table.tables[DealerID].Seats)
+
+            for (int i = 0; i < numberOfPlayers; i++)
             {
-                seat.SeatedUser = users[c];
-                c++;
+                users[i].PlayerHand.TableAndHand[0] = users[i].PlayerHand.GivenCardOne;
+                users[i].PlayerHand.TableAndHand[1] = users[i].PlayerHand.GivenCardTwo;
             }
 
         }
@@ -131,6 +133,16 @@ namespace BPTServer.Poker
             RemoveOneCardFromDeck();
             Table.tables[DealerID].TablesCards[4] = TempDeck[TempDeck.Length - 1];
             RemoveOneCardFromDeck();
+
+            for (int i = 0; i < Table.tables[DealerID].Seats.Length; i++)
+            {
+                Table.tables[DealerID].Seats[i].SeatedUser.PlayerHand.TableAndHand[2] = Table.tables[DealerID].TablesCards[0];
+                Table.tables[DealerID].Seats[i].SeatedUser.PlayerHand.TableAndHand[3] = Table.tables[DealerID].TablesCards[1];
+                Table.tables[DealerID].Seats[i].SeatedUser.PlayerHand.TableAndHand[4] = Table.tables[DealerID].TablesCards[2];
+                Table.tables[DealerID].Seats[i].SeatedUser.PlayerHand.TableAndHand[5] = Table.tables[DealerID].TablesCards[3];
+                Table.tables[DealerID].Seats[i].SeatedUser.PlayerHand.TableAndHand[6] = Table.tables[DealerID].TablesCards[4];
+            }
+
         }
 
         public void RemoveOneCardFromDeck()

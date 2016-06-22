@@ -73,49 +73,24 @@ namespace BPTServer
                             d.DealFlop();
                             d.DealTurn();
                             d.DealRiver();
+                            foreach (Card card in Table.tables[0].TablesCards)
+                            {
+                                Console.WriteLine("Table cards: " + card.Name);
+                            }
                             foreach (Seat seat in Table.tables[0].Seats)
                             {
-                                string testS = String.Format("Player {0} card one: {1} card two: {2}",
+                                string testS = String.Format("Player {0} CARDS: {1}          {2}",
                                     seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
                                     seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
                                 Console.WriteLine(testS);
                             }
-                            foreach (Card c in Table.tables[0].TablesCards)
-                            {
-                                Console.Write(c.Name + " ");
+                           List<User> winners = Rules.CheckWinners(Table.tables[0]);
 
-                            }
-                            for (int i = 0; i < 5; i++)
+                            foreach (User u in winners)
                             {
-                                for (int j = 0; j < 5; j++)
-                                {
-                                    Table.tables[0].Seats[i].SeatedUser.PlayerHand.ListHand[j] = Table.tables[0].TablesCards[j];
-                                }
+                                Console.WriteLine("Winner(s): " + u.UserName + " Hand: " + u.PlayerHand.NameOfHand + " " + u.PlayerHand.HandsValue);
                             }
-
-                            for (int i = 0; i < 3; i++)
-                            {
-                                Table.tables[0].Seats[5].SeatedUser.PlayerHand.ListHand[i] = Table.tables[0].TablesCards[i];
-
-                            }
-                            Table.tables[0].Seats[5].SeatedUser.PlayerHand.ListHand[3] = Table.tables[0].Seats[4].SeatedUser.PlayerHand.GivenCardOne;
-                            Table.tables[0].Seats[5].SeatedUser.PlayerHand.ListHand[3] = Table.tables[0].Seats[4].SeatedUser.PlayerHand.GivenCardTwo;
-                            Table.tables[0].Seats[5].SeatedUser.PlayerHand.ListHand[4] = Table.tables[0].Seats[5].SeatedUser.PlayerHand.GivenCardOne;
-                            Table.tables[0].Seats[5].SeatedUser.PlayerHand.ListHand[4] = Table.tables[0].Seats[5].SeatedUser.PlayerHand.GivenCardTwo;
-                            for (int i = 0; i < 5; i++)
-                            {
-                                for (int j = 0; j < 5; j++)
-                                {
-                                    Table.tables[0].Seats[i].SeatedUser.PlayerHand.ListHand[j] = Table.tables[0].TablesCards[j];
-
-                                }
-                            }
-                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
-
-                            foreach (User winner in winners)
-                            {
-                                Console.WriteLine(winner.UserName + " winner" + winner.PlayerHand.NameOfHand + " " + winner.PlayerHand.HandsValue);
-                            }
+                            Console.WriteLine(d.DealersDeck.Length + " " + d.TempDeck.Length);
                         }
                     }
                 }
