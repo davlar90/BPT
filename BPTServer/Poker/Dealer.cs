@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BPTServer.Poker;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,149 +9,109 @@ namespace BPTServer.Poker
 {
     class Dealer
     {
+        public static List<Dealer> dealers = new List<Dealer>();
+        public Card[] DealersDeck { get; set; }
+        public int NumberOfHandsDealed { get; set; }
+        public int DealerID { get; set; }
 
-      
-        public static string[] shuffledDeck = new string[52];
+        public static Random rnd = new Random();
 
-        public static void ShuffleDeck()    //Shuffles deck.
+        ///<summary>
+        ///Where dealerID should be the same as the tables ID.
+        ///</summary>
+        public static void NewDealer(int dealerID)
         {
-
-
-
-            string[] tempDeck = new string[52];
-            tempDeck = LoadNewDeck();
-            Random r = new Random();
-            for (int i = 0; i < 52; i++)
-            {
-                int number = r.Next(shuffledDeck.Length);
-                shuffledDeck[i] = tempDeck[number];
-                tempDeck = SlimArray(tempDeck, number);
-            }
-
             
+            Dealer d = new Dealer();
+            d.DealerID = dealerID;
+            d.DealersDeck = Deck.NewDeck();
+            d.ShuffleDeck();
+            dealers.Add(d);
         }
 
-        public static string[] LoadNewDeck()
+        public void PrintDeck()
         {
-            string[] deck = {
-                            "ca","c2","c3","c4","c5","c6","c7","c8","c9","ct","cj","cq","ck",
-                            "da","d2","d3","d4","d5","d6","d7","d8","d9","dt","dj","dq","dk",
-                            "ha","h2","h3","h4","h5","h6","h7","h8","h9","ht","hj","hq","hk",
-                            "sa","s2","s3","s4","s5","s6","s7","s8","s9","st","sj","sq","sk"};
-
-            return deck;
+            foreach (Card card in DealersDeck)
+            {
+                Console.WriteLine(card.Name);
+            }
+            Console.WriteLine(" Deck count: " + DealersDeck.Length);
         }
 
-        //public static void DealCardsPlayers()
-        //{
-        //    Table.PlaceMarkers();
-        //    Player.SetPlayerBlinds();
-        //    Player.PayBlinds();
-
-        //    int pos = 0;
-        //    for (int i = 0; i < Player.players.Length; i++)
-        //    {
-        //        if (Player.players[i].IsDealer == true)
-        //        {
-        //            pos = Player.players[i].TablePosition - 1;
-        //        }
-        //    }
-
-        //    for (int i = 0; i < Player.players.Length; i++)     //Deal first card to every player.
-        //    {
-
-        //        if (Player.players[i].HaveFolded != true)
-        //        {
-        //            if (pos < 0) pos = Player.players.Length - 1;
-        //            string firstCard = "";
-        //            firstCard = dealersDeck[dealersDeck.Length - 1].ToString();
-        //            dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //            Player.players[pos].FirstCard = firstCard;
-
-        //            pos = pos - 1;
-        //        }
-
-
-
-
-        //    }
-
-        //    for (int i = 0; i < Player.players.Length; i++)     //Deal second card to every player.
-        //    {
-        //        if (Player.players[i].HaveFolded != true)
-        //        {
-        //            if (pos < 0) pos = Player.players.Length - 1;
-
-        //            string secondCard = "";
-        //            secondCard = dealersDeck[dealersDeck.Length - 1].ToString();
-        //            dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //            Player.players[pos].SecondCard = secondCard;
-        //            pos = pos - 1;
-        //        }
-
-        //    }
-        //    Table.StartingPlayer(); //Setting starting player to Table.PlayerTurn
-        //    Player.players[Table.PlayersTurn].IsPlayerTurn = true;
-
-
-
-
-        //}
-
-        //public static void DealFlop()
-        //{
-        //    FormStart fs = new FormStart();
-
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1); //Removes one card
-        //    Table.FlopFirst = dealersDeck[dealersDeck.Length - 1];
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //    Table.FlopSecond = dealersDeck[dealersDeck.Length - 1];
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //    Table.FlopThird = dealersDeck[dealersDeck.Length - 1];
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //    fs.ShowFlop();
-        //}
-        //public static void DealTurn()
-        //{
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1); //Removes one card
-        //    Table.Turn = dealersDeck[dealersDeck.Length - 1];
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-
-
-        //}
-
-        //public static void DealRiver()
-        //{
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-        //    Table.River = dealersDeck[dealersDeck.Length - 1];
-        //    dealersDeck = SlimArray(dealersDeck, dealersDeck.Length - 1);
-
-
-        //}
-
-        //public static void ChoseDealer()
-        //{
-        //    Random r = new Random();
-        //    int rand = r.Next(Player.players.Length);
-        //    Player.players[rand].IsDealer = true;
-
-        //}
-
-
-        public static string[] SlimArray(string[] array, int index)
+        public void ShuffleDeck()
         {
-            string[] newArray = new string[array.Length - 1];
-            for (int i = 0; i < index; i++)
-            {
-                newArray[i] = array[i];
-            }
-            for (int i = index + 1; i < array.Length; i++)
-            {
-                newArray[i - 1] = array[i];
-
-            }
-            return newArray;
+            Card[] DealersDeckShuffle = DealersDeck.OrderBy(x => rnd.Next()).ToArray();
+            DealersDeck = DealersDeckShuffle;
         }
 
+        public void DealCards()
+        {
+            List<User> users = new List<User>();
+            int counter = 0;
+            int smallBlindPos = -99; 
+            foreach (Seat seat in Table.tables[DealerID].Seats)
+            {
+                if (seat.IsOccupied)
+                {
+                    users.Add(seat.SeatedUser);
+                }
+            }
+            int numberOfPlayers = users.Count();
+            foreach (User user in users)
+            {
+                if (user.IsSmallBlind)
+                {
+                    smallBlindPos = counter;
+                    counter = 0;
+                    break;
+                }
+                counter++;
+            }
+            int elseCounter = 0;
+            for (int i = smallBlindPos; i < (users.Count() + smallBlindPos); i++) // Deals first card to all players
+            {
+                if (i < users.Count())
+                {
+                    users[i].PlayerHand.GivenCardOne = DealersDeck[DealersDeck.Length - 1];
+
+                    RemoveOneCardFromDeck();
+                }
+                else
+                {
+                    users[elseCounter].PlayerHand.GivenCardOne = DealersDeck[DealersDeck.Length - 1];
+                    RemoveOneCardFromDeck();
+                    elseCounter++;
+                }
+            }
+            elseCounter = 0;
+            for (int i = smallBlindPos; i < (users.Count() + smallBlindPos); i++) // Deals second card to all players
+            {
+                if (i < users.Count())
+                {
+                    users[i].PlayerHand.GivenCardTwo = DealersDeck[DealersDeck.Length - 1];
+
+                    RemoveOneCardFromDeck();
+                }
+                else
+                {
+                    users[elseCounter].PlayerHand.GivenCardTwo = DealersDeck[DealersDeck.Length - 1];
+                    RemoveOneCardFromDeck();
+                    elseCounter++;
+                }
+            }
+            int c = 0;
+            foreach (Seat seat in Table.tables[DealerID].Seats)
+            {
+                seat.SeatedUser = users[c];
+                c++;
+            }
+
+        }
+
+        public void RemoveOneCardFromDeck()
+        {
+            int numIndex = DealersDeck.Count() - 1;
+            DealersDeck = DealersDeck.Where((val, idx) => idx != numIndex).ToArray();
+        }
     }
 }

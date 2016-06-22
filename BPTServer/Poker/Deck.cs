@@ -17,7 +17,7 @@ namespace BPTServer.Poker
                             ,"s2","s3","s4","s5","s6","s7","s8","s9","st","sj","sq","sk", "sa"};
 
 
-        public Deck NewDeck()
+        public static Card[] NewDeck()
         {
             int i = 0;
             Deck d = new Deck();
@@ -113,13 +113,13 @@ namespace BPTServer.Poker
                 d.Deck52[i] = c;
                 i++;
             }
-            return d;
+            return d.Deck52;
         }
-        public void PrintDeck(Deck d)
+        public static void PrintDeck(Card[] c)
         {
-            foreach (Card c in d.Deck52)
+            foreach (Card card in c)
             {
-                Console.WriteLine(c.Name);
+                Console.WriteLine(card.Name);
             }
         }
     }

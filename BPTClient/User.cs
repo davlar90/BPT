@@ -22,7 +22,6 @@ namespace BPTClient
 
         public User(string userName, string password)
         {
-            this.UserID = Users.Count + 1;
             this.UserName = userName;
             this.Password = password;  //Unencrypted!!
         }
