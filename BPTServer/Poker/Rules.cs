@@ -54,23 +54,33 @@ namespace BPTServer.Poker
 
 
 
-            List<Card> flush= CheckHandForFlush(h);
+            List<Card> flush = CheckHandForFlush(h);
             Card[] straight = CheckHandForStraight(h);
-            if ((straight.Length == 5) && (flush.Count() == 5))
+            if (straight.Count() == 5)
             {
-                h.NameOfHand = "Straight Flush. " + flush[0].Name + " to " + flush[4].Name;
-                h.HandsValue = 9000 + (flush[0].Value * 10);
-                if (flush[0].Value == 14)
+                Hand tempHand = new Hand();
+                for (int i = 0; i < 5; i++)
                 {
-                    h.NameOfHand = "Royal Straight Flush.";
-                    h.HandsValue = 9999;
+                    tempHand.ListHand[i] = straight[i];
                 }
+                List<Card> tempFlush = CheckHandForFlush(tempHand);
+                if (tempFlush.Count() == 5)
+                {
+                    h.NameOfHand = "Straight Flush. " + flush[0].Name + " to " + flush[4].Name;
+                    h.HandsValue = 9000 + (flush[0].Value * 10);
+                    if (flush[0].Value == 14)
+                    {
+                        h.NameOfHand = "Royal Straight Flush.";
+                        h.HandsValue = 9999;
+                    }
+                }
+
             }
             else if (flush.Count() == 5)
             {
                 h.NameOfHand = "Flush of " + flush[0].Suit + ".";
-                h.HandsValue = 6000 + ((flush[0].Value + flush[1].Value
-                     + flush[2].Value + flush[3].Value + flush[4].Value) * 10 );
+                h.HandsValue = 6000 + ((flush[0].Value * 10) + flush[1].Value
+                     + flush[2].Value + flush[3].Value + flush[4].Value);
             }
             else if (straight.Length == 5)
             {
@@ -90,6 +100,7 @@ namespace BPTServer.Poker
         public static Card[] CheckHandForStraight(Hand h)
         {
             List<Card> sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Value).ToList();
+            
             Card[] straight = new Card[5];
 
             if (sortedTableAndHand[2].Value == (sortedTableAndHand[3].Value + 1) &&
@@ -126,7 +137,6 @@ namespace BPTServer.Poker
                     }
                 }
             }
-
             return h.TableAndHand;
         }
 
@@ -401,15 +411,23 @@ namespace BPTServer.Poker
 
         private static List<Card> CheckHandForFlush(Hand h)
         {
-            List<Card> sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Suit).ToList();
+            List<Card> sortedTableAndHand = new List<Card>();
+            if (h.ListHand[0] != null)
+            {
+                sortedTableAndHand = h.ListHand.OrderByDescending(o => o.Suit).ToList();
+            }
+            else
+            {
+                sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Suit).ToList();
 
+            }
             Card[] flush = new Card[5];
             
             int clubs = 0;
             int diamonds = 0;
             int hearts = 0;
             int spades = 0;
-            foreach (Card c in h.TableAndHand)
+            foreach (Card c in sortedTableAndHand)
             {
                 switch (c.Suit)
                 {
@@ -434,10 +452,11 @@ namespace BPTServer.Poker
             int count = 0;
             if (clubs > 4)
             {
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < sortedTableAndHand.Count(); i++)
                 {
                     if ((sortedTableAndHand[i].Suit == "Clubs") && (count < 5))
                     {
+
                         flush[count] = sortedTableAndHand[i];
                         count++;
                     }
@@ -448,7 +467,7 @@ namespace BPTServer.Poker
             }
             if (hearts > 4)
             {
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < sortedTableAndHand.Count(); i++)
                 {
                     if (sortedTableAndHand[i].Suit == "Hearts" && (count < 5))
                     {
@@ -462,7 +481,7 @@ namespace BPTServer.Poker
             }
             if (diamonds > 4)
             {
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < sortedTableAndHand.Count(); i++)
                 {
                     if (sortedTableAndHand[i].Suit == "Diamonds" && (count < 5))
                     {
@@ -476,7 +495,7 @@ namespace BPTServer.Poker
             }
             if (spades > 4)
             {
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < sortedTableAndHand.Count(); i++)
                 {
                     if (sortedTableAndHand[i].Suit == "Spades" && (count < 5))
                     {
@@ -488,7 +507,7 @@ namespace BPTServer.Poker
 
                 return sortedFlush;
             }
-
+            sortedTableAndHand.Add(sortedTableAndHand[0]);
             return sortedTableAndHand;
         }
     }

@@ -71,6 +71,19 @@ namespace BPTServer
                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
                                 Console.WriteLine(i);
                                 if (winners[0].PlayerHand.NameOfHand == "Royal Straight Flush.")
+                                {
+                                    if (winners.Count() > 1)
+                                    {
+                                        int sd = 0;
+                                        if (sd == 5) break;
+                                    }
+                                    foreach (User u in winners)
+                                    {
+                                        Console.WriteLine(u.UserName + " royale straight flush!");
+
+                                    }
+                                    break;
+                                }
                             }
                         }
                         if (test == "2")
