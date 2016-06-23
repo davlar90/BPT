@@ -58,6 +58,21 @@ namespace BPTServer
                     while (true)
                     {
                         string test = Console.ReadLine();
+                        if (test == "loop")
+                        {
+                            for (int i = 0; i < 3000000; i++)
+                            {
+                                d.ShuffleDeck();
+                                d.DealCards();
+                                d.DealFlop();
+                                d.DealTurn();
+                                d.DealRiver();
+
+                           List<User> winners = Rules.CheckWinners(Table.tables[0]);
+                                Console.WriteLine(i);
+                                if (winners[0].PlayerHand.NameOfHand == "Royal Straight Flush.")
+                            }
+                        }
                         if (test == "2")
                         {
                             d.ShuffleDeck();
@@ -88,8 +103,12 @@ namespace BPTServer
 
                             foreach (User u in winners)
                             {
-                                Console.WriteLine("Winner(s): " + u.UserName + " Hand: " + u.PlayerHand.NameOfHand + " " + u.PlayerHand.HandsValue);
+                                Console.WriteLine("Winner(s): " + u.UserName);
+                                Console.WriteLine(" Hand: " + u.PlayerHand.NameOfHand + " " + u.PlayerHand.HandsValue);
                             }
+                            Console.WriteLine("");
+                            Console.WriteLine("Deck Length. Dealers deck length.");
+
                             Console.WriteLine(d.DealersDeck.Length + " " + d.TempDeck.Length);
                         }
                     }

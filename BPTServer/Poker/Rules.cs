@@ -54,28 +54,28 @@ namespace BPTServer.Poker
 
 
 
-            Card[] flush = CheckHandForFlush(h);
+            List<Card> flush= CheckHandForFlush(h);
             Card[] straight = CheckHandForStraight(h);
-            if ((straight.Length == 5) && (flush.Length == 5))
+            if ((straight.Length == 5) && (flush.Count() == 5))
             {
                 h.NameOfHand = "Straight Flush. " + flush[0].Name + " to " + flush[4].Name;
-                h.HandsValue = 900 + flush[0].Value;
+                h.HandsValue = 9000 + (flush[0].Value * 10);
                 if (flush[0].Value == 14)
                 {
                     h.NameOfHand = "Royal Straight Flush.";
-                    h.HandsValue = 914;
+                    h.HandsValue = 9999;
                 }
             }
-            else if (flush.Length == 5)
+            else if (flush.Count() == 5)
             {
                 h.NameOfHand = "Flush of " + flush[0].Suit + ".";
-                h.HandsValue = 600 + flush[0].Value + flush[1].Value
-                     + flush[2].Value + flush[3].Value + flush[4].Value;
+                h.HandsValue = 6000 + ((flush[0].Value + flush[1].Value
+                     + flush[2].Value + flush[3].Value + flush[4].Value) * 10 );
             }
             else if (straight.Length == 5)
             {
                 h.NameOfHand = "Straight " + straight[0].Name + " to " + straight[4].Name + ".";
-                h.HandsValue = 500 + straight[0].Value;
+                h.HandsValue = 5000 + (straight[0].Value * 10);
             }
             else
             {
@@ -89,39 +89,42 @@ namespace BPTServer.Poker
 
         public static Card[] CheckHandForStraight(Hand h)
         {
-            Card[] straight = new Card[5];
-            int straightStartingIndex = 0;
             List<Card> sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Value).ToList();
-            
-            int straightCounter = 0; // If this reaches 4, then is straight.
-            for (int i = 0; i < 6; i++)
+            Card[] straight = new Card[5];
+
+            if (sortedTableAndHand[2].Value == (sortedTableAndHand[3].Value + 1) &&
+                sortedTableAndHand[2].Value == (sortedTableAndHand[4].Value + 2))
             {
-                if (sortedTableAndHand[i].Value == (sortedTableAndHand[i + 1].Value + 1))
+                if (sortedTableAndHand[1].Value -1 == sortedTableAndHand[2].Value)
                 {
-                    straightCounter++;
-                    if (i == 5)
+                    if (sortedTableAndHand[0].Value -2 == sortedTableAndHand[2].Value)
                     {
-                        if (sortedTableAndHand[6].Value == sortedTableAndHand[5].Value)
+                        for (int i = 0; i < 5; i++)
                         {
-                            straightCounter++;
+                            straight[i] = sortedTableAndHand[i];
                         }
+                        return straight;                   
                     }
-                    if (straightCounter == 4) break;
+                    else if (sortedTableAndHand[5].Value +1 == sortedTableAndHand[4].Value)
+                    {
+                        for (int i = 0; i < 5; i++)
+                        {
+                            straight[i] = sortedTableAndHand[i + 1];
+                        }
+                        return straight;
+                    }
                 }
-                else
+                else if (sortedTableAndHand[5].Value +1 == sortedTableAndHand[4].Value)
                 {
-                    straightCounter = 0;
-                    straightStartingIndex++;
-                    if (straightStartingIndex == 3) break;
+                    if (sortedTableAndHand[6].Value +2 == sortedTableAndHand[4].Value)
+                    {
+                        for (int i = 0; i < 5; i++)
+                        {
+                            straight[i] = sortedTableAndHand[i + 2];
+                        }
+                        return straight;
+                    }
                 }
-            }
-            if (straightCounter >= 4)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    straight[i] = sortedTableAndHand[straightStartingIndex + i];
-                }
-                return straight;
             }
 
             return h.TableAndHand;
@@ -142,14 +145,14 @@ namespace BPTServer.Poker
                 
                 if(sameValueCount == 2) //Single Pair
                 {
-                    handsValue += 200;
-                    nameHand = "Pair of " + cardsChecked[0].Value + "'s";
+                    handsValue += 2000 + (cardsChecked[0].Value * 10);
+                    nameHand = "Pair of " + GetNameFromCardValue(cardsChecked[0]) + "'s";
                 }
                 else if (sameValueCount == 3)
                 {
                     //three of a kind
-                    nameHand = "Three of a kind. " + cardsChecked[0].Value + "'s";
-                    handsValue += 400;
+                    nameHand = "Three of a kind. " + GetNameFromCardValue(cardsChecked[0]) + "'s";
+                    handsValue += 4000 + (cardsChecked[0].Value * 10);
 
                 }
                 else if (sameValueCount == 4)
@@ -157,54 +160,69 @@ namespace BPTServer.Poker
                     if ((cardsChecked[0].Value == cardsChecked[1].Value) && 
                         (cardsChecked[0].Value == cardsChecked[2].Value))
                     {   // Four of a kind
-                        nameHand = "Four of a kind " + cardsChecked[0].Value + "'s";
-                        handsValue += 800;
+                        nameHand = "Four of a kind " + GetNameFromCardValue(cardsChecked[0]) + "'s";
+                        handsValue += 8000 + (cardsChecked[0].Value * 10);
                     }
                     else
                     {
                         if (cardsChecked[0].Value == cardsChecked[1].Value)  //Twopair
                         {
-                            nameHand = "Two pairs. " + cardsChecked[0].Value + "'s and " + cardsChecked[2].Value + "'s";
-                            handsValue += 300;
+                            nameHand = "Two pairs. " + GetNameFromCardValue(cardsChecked[0]) + 
+                                "'s and " + GetNameFromCardValue(cardsChecked[2]) + "'s";
+                            if (cardsChecked[0].Value > cardsChecked[2].Value)
+                            {
+                                handsValue += 3000 + (cardsChecked[0].Value * 10);
+                            }
+                            else
+                            {
+                                handsValue += 3000 + (cardsChecked[2].Value * 10);
+                            }
                         }
                         else // Twopair
                         {
-                            nameHand = "Two pairs. " + cardsChecked[0].Value + "'s and " + cardsChecked[1].Value + "'s";
+                            nameHand = "Two pairs. " + GetNameFromCardValue(cardsChecked[0]) + 
+                                "'s and " + GetNameFromCardValue(cardsChecked[1]) + "'s";
 
-                            handsValue += 300;
+                            if (cardsChecked[0].Value > cardsChecked[1].Value)
+                            {
+                                handsValue += 3000 + (cardsChecked[0].Value * 10);
+                            }
+                            else
+                            {
+                                handsValue += 3000 + (cardsChecked[1].Value * 10);
+                            }
                         }
                     }
                 }
                 else if (sameValueCount == 5)
                 {
                     int counter = 0;
-                    foreach (Card card in cardsChecked)
+                    for (int i = 0; i < 5; i++)
                     {
-                        if (cardsChecked[0].Value == cardsChecked[counter].Value)
-                        {
-                            counter++;
-                        }
+                        if (cardsChecked[0].Value == cardsChecked[i].Value) counter++;
                     }
-                    string value = "";
+                    string thePair = "";
+                    int thePairIndex = 0;
                     foreach (Card cards in cardsChecked)
                     {
                         if (cards.Value != cardsChecked[0].Value)
                         {
-                            value = cards.Name;
+                            thePairIndex++;
+                            thePair = GetNameFromCardValue(cards);
                             break;
                         }
                     }
                     if (counter == 3) // Full house. First card in list is the 3pair
                     {
-                        nameHand = "Full house. " + cardsChecked[0].Value +
-                            "'s and " + value + "'s";
-                        handsValue += 700;
+                        nameHand = "Full house. " + "3 " + GetNameFromCardValue(cardsChecked[0]) +
+                            "'s and 2 " + thePair + "'s";
+                        handsValue += 7000 + (cardsChecked[0].Value * 10) + cardsChecked[thePairIndex].Value;
                     }
                     else // Full House. 
                     {
-                        nameHand = "Full house with three of " + value +
-                            " and two of " + cardsChecked[0].Name + ".";
-                        handsValue += 700;
+                        nameHand = "Full house. 3 " + GetNameFromCardValue(cardsChecked[thePairIndex]) +
+                            "'s and 2 " + GetNameFromCardValue(cardsChecked[0]) + "'s";
+                        handsValue += 7000 + (cardsChecked[thePairIndex].Value * 10) + cardsChecked[0].Value;
                     }
 
 
@@ -230,6 +248,37 @@ namespace BPTServer.Poker
             h.HandsValue = handsValue;
             h.NameOfHand = nameHand + highCards;
             return h;
+        }
+
+        public static string GetNameFromCardValue(Card c)
+        {
+            string name = "";
+            if (c.Value > 10)
+            {
+                switch (c.Value)
+                {
+                    case 11:
+                        name = "Jack";
+                        break;
+
+                    case 12:
+                        name = "Queen";
+                        break;
+
+                    case 13:
+                        name = "King";
+                        break;
+
+                    case 14:
+                        name = "Ace";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else name = c.Value.ToString();
+            return name;
         }
 
         private static List<List<Card>> CheckCardsOfSameValue(Hand h)
@@ -267,8 +316,8 @@ namespace BPTServer.Poker
 
             if (returnCards.Count() > 5)
             {
-                int m = 0;
 
+                List<Card> tempListFoursAndThrees = new List<Card>();
                 List<Card> tempListThreePairs = new List<Card>();
                 List<Card> tempReturnCards = new List<Card>();
                 for (int i = 0; i < 7; i++)
@@ -276,72 +325,49 @@ namespace BPTServer.Poker
                     if (counters[i] == 4)
                     {
                         tempReturnCards.Add(h.TableAndHand[i]);
-                        tempReturnCards.Add(h.TableAndHand[i]);
-                        tempReturnCards.Add(h.TableAndHand[i]);
-                        tempReturnCards.Add(h.TableAndHand[i]);
-                        returnCards = tempReturnCards;
-                        break;
+                        
                     }
                     else if (counters[i] == 3)
                     {
-
                         tempReturnCards.Add(h.TableAndHand[i]);
-                        tempReturnCards.Add(h.TableAndHand[i]);
-                        tempReturnCards.Add(h.TableAndHand[i]);
-                        for (int j = 0; j < 7; j++)
-                        {
-                            int c = 0;
-                            if (counters[j] == 2)
-                            {
-                                c = j;
-                                for (int k = 0; k < 7; k++)
-                                {
-                                    if ((k != c) && (counters[k] == 2))
-                                    {
-                                        if (counters[c] > counters[k])
-                                        {
-                                            tempReturnCards.Add(h.TableAndHand[c]);
-                                            tempReturnCards.Add(h.TableAndHand[c]);
-                                        }
-                                        else
-                                        {
-                                            tempReturnCards.Add(h.TableAndHand[k]);
-                                            tempReturnCards.Add(h.TableAndHand[k]);
-
-                                        }
-                                        returnCards = tempReturnCards;
-                                    }
-                                }
-                            }
-
-                        }
-                        m++;
-
-                        if (m == 2)
-                        {
-                                tempReturnCards.Add(h.TableAndHand[i]);
-                                tempReturnCards.Add(h.TableAndHand[i]);
-                                returnCards = tempReturnCards;
-                        }
                     }
                     else if (counters[i] == 2)
                     {
                         tempListThreePairs.Add(h.TableAndHand[i]);
                     }
                 }
+                returnCards.Clear();
                 if (tempListThreePairs.Count() != 0)
                 {
                     List<Card> sortThreePairs = tempListThreePairs.OrderByDescending(o => o.Value).ToList();
-                    sortThreePairs.RemoveAt(5);
-                    sortThreePairs.RemoveAt(4);
+                    if (sortThreePairs.Count() == 6)
+                    {
+                        sortThreePairs.RemoveAt(5);
+                        sortThreePairs.RemoveAt(4);
+                        returnCards = sortThreePairs;
 
-                    returnCards = sortThreePairs;
+                    }
+                    else if (sortThreePairs.Count() == 4)
+                    {
+                        sortThreePairs.RemoveAt(3);
+                        sortThreePairs.RemoveAt(2);
+                        returnCards = sortThreePairs;
+                    }
+                }
+                foreach (Card c in tempReturnCards)
+                {
+                    returnCards.Add(c);
                 }
             }
 
             
 
             List<Card> sortedReturnCards = returnCards.OrderByDescending(o => o.Value).ToList();
+            if (sortedReturnCards.Count() == 6)
+            {
+                sortedReturnCards.RemoveAt(sortedReturnCards.Count - 1);
+                returnCards = sortedReturnCards;
+            }
 
             List<Card> highCardList = new List<Card>();
             foreach (Card card in h.TableAndHand)
@@ -361,7 +387,10 @@ namespace BPTServer.Poker
 
                 if (returnCards.Count() + sortedHighCardList.Count() > 5)
                 {
-                    sortedHighCardList.RemoveAt(sortedHighCardList.Count - 1);
+                    if (sortedHighCardList.Count > 0)
+                    {
+                        sortedHighCardList.RemoveAt(sortedHighCardList.Count - 1);
+                    }
                 }
                 else break;
             }
@@ -370,7 +399,7 @@ namespace BPTServer.Poker
 
         }
 
-        private static Card[] CheckHandForFlush(Hand h)
+        private static List<Card> CheckHandForFlush(Hand h)
         {
             List<Card> sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Suit).ToList();
 
@@ -413,7 +442,9 @@ namespace BPTServer.Poker
                         count++;
                     }
                 }
-                return flush;
+                List<Card> sortedFlush = flush.OrderByDescending(o => o.Value).ToList();
+
+                return sortedFlush;
             }
             if (hearts > 4)
             {
@@ -425,7 +456,9 @@ namespace BPTServer.Poker
                         count++;
                     }
                 }
-                return flush;
+                List<Card> sortedFlush = flush.OrderByDescending(o => o.Value).ToList();
+
+                return sortedFlush;
             }
             if (diamonds > 4)
             {
@@ -437,7 +470,9 @@ namespace BPTServer.Poker
                         count++;
                     }
                 }
-                return flush;
+                List<Card> sortedFlush = flush.OrderByDescending(o => o.Value).ToList();
+
+                return sortedFlush;
             }
             if (spades > 4)
             {
@@ -449,10 +484,12 @@ namespace BPTServer.Poker
                         count++;
                     }
                 }
-                return flush;
+                List<Card> sortedFlush = flush.OrderByDescending(o => o.Value).ToList();
+
+                return sortedFlush;
             }
 
-            return h.TableAndHand;
+            return sortedTableAndHand;
         }
     }
 }
