@@ -74,6 +74,11 @@ namespace BPTServer.Poker
                         h.HandsValue = 9999;
                     }
                 }
+                else
+                {
+                    h.NameOfHand = "Straight " + straight[0].Name + " to " + straight[4].Name + ".";
+                    h.HandsValue = 5000 + (straight[0].Value * 10);
+                }
 
             }
             else if (flush.Count() == 5)
@@ -82,14 +87,8 @@ namespace BPTServer.Poker
                 h.HandsValue = 6000 + ((flush[0].Value * 10) + flush[1].Value
                      + flush[2].Value + flush[3].Value + flush[4].Value);
             }
-            else if (straight.Length == 5)
-            {
-                h.NameOfHand = "Straight " + straight[0].Name + " to " + straight[4].Name + ".";
-                h.HandsValue = 5000 + (straight[0].Value * 10);
-            }
             else
             {
-
                 h = CheckHandSameValuedCards(h);
             }
 
@@ -99,44 +98,128 @@ namespace BPTServer.Poker
 
         public static Card[] CheckHandForStraight(Hand h)
         {
+
+            // All cards must be single in this list!!
             List<Card> sortedTableAndHand = h.TableAndHand.OrderByDescending(o => o.Value).ToList();
-            
+            HashSet<int> values = new HashSet<int>(); // Type of property
+            sortedTableAndHand.RemoveAll(i => !values.Add(i.Value));
+            sortedTableAndHand = sortedTableAndHand.OrderByDescending(o => o.Value).ToList();
+
             Card[] straight = new Card[5];
 
-            if (sortedTableAndHand[2].Value == (sortedTableAndHand[3].Value + 1) &&
-                sortedTableAndHand[2].Value == (sortedTableAndHand[4].Value + 2))
+
+            if (sortedTableAndHand[0].Value == 14)
             {
-                if (sortedTableAndHand[1].Value -1 == sortedTableAndHand[2].Value)
+                Card c = new Card();
+                c.Suit = sortedTableAndHand[0].Suit;
+                c.Value = 1;
+                c.Name = "Ace(1) of " + c.Suit;
+                sortedTableAndHand.Add(c);
+            }
+            if (sortedTableAndHand.Count() == 8)
+            {
+                if (sortedTableAndHand[2].Value == (sortedTableAndHand[3].Value + 1) &&
+                     sortedTableAndHand[2].Value == (sortedTableAndHand[4].Value + 2) || (sortedTableAndHand[3].Value ==
+                     sortedTableAndHand[5 + 2].Value))
                 {
-                    if (sortedTableAndHand[0].Value -2 == sortedTableAndHand[2].Value)
+                    if (sortedTableAndHand[1].Value - 1 == sortedTableAndHand[2].Value)
                     {
-                        for (int i = 0; i < 5; i++)
+                        if (sortedTableAndHand[0].Value - 2 == sortedTableAndHand[2].Value)
                         {
-                            straight[i] = sortedTableAndHand[i];
+                            for (int i = 0; i < 5; i++)
+                            {
+                                straight[i] = sortedTableAndHand[i];
+                            }
+                            return straight;
                         }
-                        return straight;                   
+                        else if (sortedTableAndHand[5].Value + 1 == sortedTableAndHand[4].Value)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                straight[i] = sortedTableAndHand[i + 1];
+                            }
+                            return straight;
+                        }
                     }
-                    else if (sortedTableAndHand[5].Value +1 == sortedTableAndHand[4].Value)
+                    else if (sortedTableAndHand[5].Value + 1 == sortedTableAndHand[4].Value)
                     {
-                        for (int i = 0; i < 5; i++)
+                        if (sortedTableAndHand[6].Value + 2 == sortedTableAndHand[4].Value)
                         {
-                            straight[i] = sortedTableAndHand[i + 1];
+
+                            if (sortedTableAndHand[7].Value + 3 == sortedTableAndHand[4].Value)
+                            {
+                                for (int i = 0; i < 5; i++)
+                                {
+                                    straight[i] = sortedTableAndHand[i + 3];
+                                }
+                                return straight;
+                            }
+                            else
+                            {
+                                for (int i = 0; i < 5; i++)
+                                {
+                                    straight[i] = sortedTableAndHand[i + 2];
+                                }
+                                return straight;
+                            }
+
                         }
-                        return straight;
-                    }
-                }
-                else if (sortedTableAndHand[5].Value +1 == sortedTableAndHand[4].Value)
-                {
-                    if (sortedTableAndHand[6].Value +2 == sortedTableAndHand[4].Value)
-                    {
-                        for (int i = 0; i < 5; i++)
-                        {
-                            straight[i] = sortedTableAndHand[i + 2];
-                        }
-                        return straight;
                     }
                 }
             }
+            else if (sortedTableAndHand.Count() == 7)
+            {
+
+                if (sortedTableAndHand[2].Value == (sortedTableAndHand[3].Value + 1) &&
+                    sortedTableAndHand[2].Value == (sortedTableAndHand[4].Value + 2))
+                {
+                    if (sortedTableAndHand[1].Value - 1 == sortedTableAndHand[2].Value)
+                    {
+                        if (sortedTableAndHand[0].Value - 2 == sortedTableAndHand[2].Value)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                straight[i] = sortedTableAndHand[i];
+                            }
+                            return straight;
+                        }
+                        else if (sortedTableAndHand[5].Value + 1 == sortedTableAndHand[4].Value)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                straight[i] = sortedTableAndHand[i + 1];
+                            }
+                            return straight;
+                        }
+                    }
+                    else if (sortedTableAndHand[5].Value + 1 == sortedTableAndHand[4].Value)
+                    {
+                        if (sortedTableAndHand[6].Value + 2 == sortedTableAndHand[4].Value)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                straight[i] = sortedTableAndHand[i + 2];
+                            }
+                            return straight;
+                        }
+                    }
+                }
+            }
+            else if (sortedTableAndHand.Count() > 4)
+            {
+                if (sortedTableAndHand[0].Value == sortedTableAndHand[1].Value + 1)
+                    if (sortedTableAndHand[0].Value == sortedTableAndHand[2].Value + 2)
+                        if (sortedTableAndHand[0].Value == sortedTableAndHand[3].Value + 3)
+                            if (sortedTableAndHand[0].Value == sortedTableAndHand[4].Value + 4)
+                            {
+                                for (int i = 0; i < 5; i++)
+                                {
+                                    straight[i] = sortedTableAndHand[i];
+                                }
+                                return straight;
+                            }
+            }
+                           
             return h.TableAndHand;
         }
 

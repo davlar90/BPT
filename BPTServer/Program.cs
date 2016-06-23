@@ -60,7 +60,8 @@ namespace BPTServer
                         string test = Console.ReadLine();
                         if (test == "loop")
                         {
-                            for (int i = 0; i < 3000000; i++)
+                            int count = 0;
+                            for (int i = 0; i < 3000; i++)
                             {
                                 d.ShuffleDeck();
                                 d.DealCards();
@@ -69,22 +70,18 @@ namespace BPTServer
                                 d.DealRiver();
 
                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
-                                Console.WriteLine(i);
-                                if (winners[0].PlayerHand.NameOfHand == "Royal Straight Flush.")
+                                if (winners[0].PlayerHand.NameOfHand.Contains("Straight"))
                                 {
-                                    if (winners.Count() > 1)
-                                    {
-                                        int sd = 0;
-                                        if (sd == 5) break;
-                                    }
+                                    count++;
                                     foreach (User u in winners)
                                     {
-                                        Console.WriteLine(u.UserName + " royale straight flush!");
+                                        Console.WriteLine(u.UserName + u.PlayerHand.NameOfHand + " " + u.PlayerHand.HandsValue);
 
                                     }
-                                    break;
+                                    
                                 }
                             }
+                            Console.WriteLine(count);
                         }
                         if (test == "2")
                         {
