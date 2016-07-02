@@ -13,6 +13,9 @@ namespace BPTServer.Poker
         {
             List<User> players = new List<User>();
             List<User> winners = new List<User>();
+
+            List<User> twoPairs = new List<User>();
+
             for (int i = 0; i < t.Seats.Count(); i++)
             {
                 if (t.Seats[i].IsOccupied)
@@ -24,6 +27,7 @@ namespace BPTServer.Poker
             List<User> sortedPlayers = players.OrderByDescending(o => o.PlayerHand.HandsValue).ToList();
             int numberOfPlayers = sortedPlayers.Count();
             winners.Add(sortedPlayers[0]);
+
             for (int i = 1; i < numberOfPlayers; i++)
             {
                 if (sortedPlayers[i].PlayerHand.HandsValue == sortedPlayers[0].PlayerHand.HandsValue)
@@ -67,24 +71,24 @@ namespace BPTServer.Poker
                 if (tempFlush.Count() == 5)
                 {
                     h.NameOfHand = "Straight Flush. " + flush[0].Name + " to " + flush[4].Name;
-                    h.HandsValue = 9000 + (flush[0].Value * 10);
+                    h.HandsValue = 90000 + flush[0].Value;
                     if (flush[0].Value == 14)
                     {
                         h.NameOfHand = "Royal Straight Flush.";
-                        h.HandsValue = 9999;
+                        h.HandsValue = 99999;
                     }
                 }
                 else
                 {
                     h.NameOfHand = "Straight " + straight[0].Name + " to " + straight[4].Name + ".";
-                    h.HandsValue = 5000 + (straight[0].Value * 10);
+                    h.HandsValue = 50000 + straight[0].Value;
                 }
 
             }
             else if (flush.Count() == 5)
             {
                 h.NameOfHand = "Flush of " + flush[0].Suit + ".";
-                h.HandsValue = 6000 + ((flush[0].Value * 10) + flush[1].Value
+                h.HandsValue = 60000 + ((flush[0].Value * 10) + flush[1].Value
                      + flush[2].Value + flush[3].Value + flush[4].Value);
             }
             else
@@ -230,22 +234,21 @@ namespace BPTServer.Poker
 
             List<List<Card>> cardsCheckedList = CheckCardsOfSameValue(h);
             List<Card> cardsChecked = cardsCheckedList[0];
-
-
             int sameValueCount = cardsChecked.Count();
+
             if (sameValueCount > 1)
             {
                 
                 if(sameValueCount == 2) //Single Pair
                 {
-                    handsValue += 2000 + (cardsChecked[0].Value * 10);
+                    handsValue += 20000 + (cardsChecked[0].Value * 20);
                     nameHand = "Pair of " + GetNameFromCardValue(cardsChecked[0]) + "'s";
                 }
                 else if (sameValueCount == 3)
                 {
                     //three of a kind
                     nameHand = "Three of a kind. " + GetNameFromCardValue(cardsChecked[0]) + "'s";
-                    handsValue += 4000 + (cardsChecked[0].Value * 10);
+                    handsValue += 40000 + (cardsChecked[0].Value * 20);
 
                 }
                 else if (sameValueCount == 4)
@@ -254,7 +257,7 @@ namespace BPTServer.Poker
                         (cardsChecked[0].Value == cardsChecked[2].Value))
                     {   // Four of a kind
                         nameHand = "Four of a kind " + GetNameFromCardValue(cardsChecked[0]) + "'s";
-                        handsValue += 8000 + (cardsChecked[0].Value * 10);
+                        handsValue += 80000 + (cardsChecked[0].Value * 20);
                     }
                     else
                     {
@@ -264,11 +267,11 @@ namespace BPTServer.Poker
                                 "'s and " + GetNameFromCardValue(cardsChecked[2]) + "'s";
                             if (cardsChecked[0].Value > cardsChecked[2].Value)
                             {
-                                handsValue += 3000 + (cardsChecked[0].Value * 10);
+                                handsValue += 30000 + ((cardsChecked[0].Value * 300) + cardsChecked[2].Value * 30);
                             }
                             else
                             {
-                                handsValue += 3000 + (cardsChecked[2].Value * 10);
+                                handsValue += 30000 + ((cardsChecked[0].Value * 30) + cardsChecked[2].Value * 300);
                             }
                         }
                         else // Twopair
@@ -278,11 +281,13 @@ namespace BPTServer.Poker
 
                             if (cardsChecked[0].Value > cardsChecked[1].Value)
                             {
-                                handsValue += 3000 + (cardsChecked[0].Value * 10);
+                                handsValue += 30000 + ((cardsChecked[0].Value * 300) + cardsChecked[1].Value * 30);
+
                             }
                             else
                             {
-                                handsValue += 3000 + (cardsChecked[1].Value * 10);
+                                handsValue += 30000 + ((cardsChecked[0].Value * 30) + cardsChecked[1].Value * 300);
+
                             }
                         }
                     }
@@ -309,18 +314,18 @@ namespace BPTServer.Poker
                     {
                         nameHand = "Full house. " + "3 " + GetNameFromCardValue(cardsChecked[0]) +
                             "'s and 2 " + thePair + "'s";
-                        handsValue += 7000 + (cardsChecked[0].Value * 10) + cardsChecked[thePairIndex].Value;
+                        handsValue += 70000 + (cardsChecked[0].Value * 10) + cardsChecked[thePairIndex].Value;
                     }
                     else // Full House. 
                     {
                         nameHand = "Full house. 3 " + GetNameFromCardValue(cardsChecked[thePairIndex]) +
                             "'s and 2 " + GetNameFromCardValue(cardsChecked[0]) + "'s";
-                        handsValue += 7000 + (cardsChecked[thePairIndex].Value * 10) + cardsChecked[0].Value;
+                        handsValue += 70000 + (cardsChecked[thePairIndex].Value * 10) + cardsChecked[0].Value;
                     }
 
 
                 }
-                else // High card
+                else 
                 {
 
                 }
@@ -341,6 +346,11 @@ namespace BPTServer.Poker
             h.HandsValue = handsValue;
             h.NameOfHand = nameHand + highCards;
             return h;
+        }
+
+        private static void TwoPair()
+        {
+
         }
 
         public static string GetNameFromCardValue(Card c)

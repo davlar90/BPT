@@ -61,7 +61,7 @@ namespace BPTServer
                         if (test == "loop")
                         {
                             int count = 0;
-                            for (int i = 0; i < 3000; i++)
+                            for (int i = 0; i < 30000; i++)
                             {
                                 d.ShuffleDeck();
                                 d.DealCards();
@@ -70,15 +70,34 @@ namespace BPTServer
                                 d.DealRiver();
 
                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
-                                if (winners[0].PlayerHand.NameOfHand.Contains("Straight"))
+                                if (winners[0].PlayerHand.NameOfHand.Contains("Royal Straight Flush"))
                                 {
-                                    count++;
-                                    foreach (User u in winners)
-                                    {
-                                        Console.WriteLine(u.UserName + u.PlayerHand.NameOfHand + " " + u.PlayerHand.HandsValue);
 
-                                    }
                                     
+                                    if (winners.Count() > 0)
+                                    {
+                                        count++;
+                                        Console.WriteLine("Royal Straight Flush");
+                                        foreach (Seat seat in Table.tables[0].Seats)
+                                        {
+                                            string testS = String.Format("Player {0} CARDS: {1}          {2}",
+                                                seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
+                                                seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
+                                            Console.WriteLine(testS);
+                                        }
+                                        Console.WriteLine(".......");
+
+                                        foreach (Card card in Table.tables[0].TablesCards)
+                                        {
+                                            Console.WriteLine("Table cards: " + card.Name);
+                                        }
+                                        Console.WriteLine(".......");
+                                        foreach (User u in winners)
+                                        {
+                                            Console.WriteLine(String.Format("{0} HandName {1} Points {2} " , u.UserName,
+                                                u.PlayerHand.NameOfHand, u.PlayerHand.HandsValue));
+                                        }
+                                    }
                                 }
                             }
                             Console.WriteLine(count);

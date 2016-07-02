@@ -144,7 +144,6 @@ namespace BPTServer.Poker
             }
 
         }
-
         public void RemoveOneCardFromDeck()
         {
             TempDeck = TempDeck.Take(TempDeck.Count() - 1).ToArray();
