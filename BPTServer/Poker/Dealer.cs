@@ -9,7 +9,7 @@ namespace BPTServer.Poker
 {
     class Dealer
     {
-        public static List<Dealer> dealers = new List<Dealer>();
+        public static Dealer[] dealers = new Dealer[30];
         public Card[] DealersDeck { get; set; }
         public Card[] TempDeck { get; set; }
         public int NumberOfHandsDealt { get; set; }
@@ -27,7 +27,7 @@ namespace BPTServer.Poker
             d.DealersDeck = Deck.NewDeck();
             d.ShuffleDeck();
             d.ChooseDealer();
-            dealers.Add(d);
+            dealers[dealerID] = d;
         }
 
         public void PrintDeck()

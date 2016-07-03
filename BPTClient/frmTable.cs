@@ -16,7 +16,7 @@ namespace BPTClient
     {
         public delegate void delNoValue();
         public delegate void delSetValue(string value);
-
+        
         public int TableID { get; set; }
 
         public frmTable(int id)
@@ -27,12 +27,29 @@ namespace BPTClient
 
         private void frmTable_Load(object sender, EventArgs e)
         {
+            lblUserName0.Visible = false;
+            lblUserName1.Visible = false;
+            lblUserName2.Visible = false;
+            lblUserName3.Visible = false;
+            lblUserName4.Visible = false;
+            lblUserName5.Visible = false;
+
+            countdownBar.Maximum = 100;
+            countdownBar.Value = 100;
+            countdownBar.Visible = false;
 
             btnStartGame.Visible = false;
             cbReady.Visible = false;
 
             GetTableDataNewTable();
+        }
 
+        public void PlayerTurn()
+        {
+            timerPlayerTurn.Enabled = true;
+            timerPlayerTurn.Start();
+            timerPlayerTurn.Interval = 100;
+            timerPlayerTurn.Tick += new EventHandler(timerPlayerTurn_Tick);
         }
 
         public void AppendToStatusBox(string text)
@@ -47,15 +64,19 @@ namespace BPTClient
             tbChat.AppendText(text + "\r\n");
         }
 
-        public void UserTakeSeat()
+        public void UserTakeSeat(int seatNr)
         {
 
-            this.button1.Enabled = false;
-            this.button2.Enabled = false;
-            this.button3.Enabled = false;
-            this.button4.Enabled = false;
-            this.button5.Enabled = false;
-            this.button6.Enabled = false;
+            this.btnSeat0.Visible = false;
+            this.btnSeat1.Visible = false;
+            this.btnSeat2.Visible = false;
+            this.btnSeat3.Visible = false;
+            this.btnSeat4.Visible = false;
+            this.btnSeat5.Visible = false;
+            ((Label)this.Controls.Find(
+                        "lblUserName" + (seatNr).ToString(), true)[0]).Visible = true;
+            ((Label)this.Controls.Find(
+                        "lblUserName" + (seatNr).ToString(), true)[0]).Text = User.Users[0].UserName;
         }
         public void DelAppendToChat(string text)
         {
@@ -78,11 +99,14 @@ namespace BPTClient
 
         public void DelPlayerHand(string cards)
         {
-
-            if (this.InvokeRequired) this.Invoke(new delSetValue(DelAppendToTableLog), cards);
+            string[] splitted = cards.Split('¤');
+            if (this.InvokeRequired) this.Invoke(new delSetValue(DelPlayerHand), cards);
             else
             {
-                AppendToChat("Cards: " + cards);
+                foreach (string item in splitted)
+                {
+                    AppendToChat("Cards: " + item);
+                }
             }
         }
 
@@ -98,9 +122,9 @@ namespace BPTClient
 
         private void StartingGame()
         {
-            //btnStartGame.Visible = false;
+            btnStartGame.Visible = false;
             cbReady.Visible = false;
-
+            
         }
 
         public void DelUpdateTables()
@@ -127,17 +151,17 @@ namespace BPTClient
                         btnStartGame.Enabled = true;
                         btnStartGame.Visible = true;
                         cbReady.Visible = true;
-                        UserTakeSeat();
                     }
                 }
 
                 if (seat.IsOccupied)
                 {
                 ((Button)this.Controls.Find(
-                        "button" + (seat.SeatNumber + 1).ToString(), true)[0]).Enabled = false;
-                ((Button)this.Controls.Find(
-                         "button" + (seat.SeatNumber + 1).ToString(), true)[0]).Text = 
-                         seat.SeatedUser.UserName;
+                       "btnSeat" + (seat.SeatNumber).ToString(), true)[0]).Enabled = false;
+                    ((Label)this.Controls.Find(
+                    "lblUserName" + (seat.SeatNumber).ToString(), true)[0]).Visible = true;
+                    ((Label)this.Controls.Find(
+                        "lblUserName" + (seat.SeatNumber).ToString(), true)[0]).Text = seat.SeatedUser.UserName;
                 }
             }
         }
@@ -147,54 +171,14 @@ namespace BPTClient
             Client.listClients[0].SendMessage("cmdSit¤" +
                     User.Users[0].UserName + "¤" + TableID + "¤" + seat);
             cbReady.Visible = true;
-            UserTakeSeat();
+            UserTakeSeat(int.Parse(seat));
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
 
-            PlayerSitDown("1");
-            
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            PlayerSitDown("2");
-
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            PlayerSitDown("3");
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            PlayerSitDown("4");
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            PlayerSitDown("5");
-        }
 
         private void btnSend_Click(object sender, EventArgs e)
         {
             
-        }
-
-        private void cbShowLog_CheckedChanged(object sender, EventArgs e)
-        {
-            if (cbShowLog.Checked)
-            {
-                lblTableStatus.Visible = true;
-                tbStatus.Visible = true;
-            }
-            else
-            {
-                lblTableStatus.Visible = false;
-                tbStatus.Visible = false;
-            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -234,6 +218,74 @@ namespace BPTClient
                 Client.listClients[0].SendMessage("cmdIsUserReadyToStart¤no¤" + TableID.ToString() +
                     "¤" + seatNr.ToString());
             }
+        }
+
+        private void btnSeat1_Click(object sender, EventArgs e)
+        {
+            PlayerSitDown("1");
+
+        }
+
+        private void btnSeat2_Click(object sender, EventArgs e)
+        {
+            PlayerSitDown("2");
+
+        }
+
+        private void btnSeat3_Click(object sender, EventArgs e)
+        {
+            PlayerSitDown("3");
+
+        }
+
+        private void btnSeat4_Click(object sender, EventArgs e)
+        {
+            PlayerSitDown("4");
+
+        }
+
+        internal void HostSitDown()
+        {
+            PlayerSitDown("0");
+        }
+
+        private void btnSeat5_Click(object sender, EventArgs e)
+        {
+            PlayerSitDown("5");
+
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void timerPlayerTurn_Tick(object sender, EventArgs e)
+        {
+            
+            
+            if (countdownBar.Value != 0)
+            {
+
+                if (countdownBar.Value == 99) countdownBar.Visible = true;
+                countdownBar.Value--;
+            }
+            else
+            {
+                
+                
+                timerPlayerTurn.Stop();
+                MessageBox.Show("Times up!");
+                countdownBar.Value = 100;
+                countdownBar.Visible = false;
+                
+
+            }
+        }
+
+        private void btnFold_Click(object sender, EventArgs e)
+        {
+            PlayerTurn();
         }
     }
 }

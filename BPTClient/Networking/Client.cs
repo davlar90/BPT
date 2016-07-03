@@ -40,12 +40,10 @@ namespace BPTClient.Networking
                 string disConnect = UserName + " requested to close conn.";
                 CloseConnection(disConnect);
             }
-
         }
+
         private void initializeConnection(string ip, int port)
         {
-
-
             tcpServer = new TcpClient();
 
             UserName = User.Users[0].UserName;
@@ -62,8 +60,6 @@ namespace BPTClient.Networking
             thrMessaging.Start();
 
         }
-
-
 
         private void ReceiveMessages()
         {
@@ -124,13 +120,15 @@ namespace BPTClient.Networking
                         {
                             case "cmdFromServerGivePlayerCards":
 
-                                frmMain.frmTables[int.Parse(splitted[1])].DelPlayerHand(splitted[2] + " " + splitted[3]);
+                                frmMain.frmTables[int.Parse(splitted[1])].DelPlayerHand(splitted[2] + "¤" + splitted[3] + "¤" + splitted[4] + "¤" + splitted[5]);
+                                frmMain.frmTables[int.Parse(splitted[1])].DelAppendToTableLog("Hand nr: " + splitted[8] + " Cards: " + splitted[6] + " " + splitted[7]);
 
                                 break;
 
                             case "cmdFromServerStartGame":
                                 frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat("Starting game...");
                                 frmMain.frmTables[int.Parse(splitted[1])].DelStartingGame();
+
                                 break;
                                 
                             case "cmdUserDisconnected":

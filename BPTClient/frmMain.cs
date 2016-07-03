@@ -79,6 +79,8 @@ namespace BPTClient
                 
             }
         }
+
+
         public void AppendTextBoxChat(string value)
         {
 
@@ -170,14 +172,11 @@ namespace BPTClient
                                 ft.Show();
                                 Client.listClients[0].SendMessage("cmdGetSeatedPlayers¤" + t.TableID);
                                 frmTables[t.TableID] = ft;
-
-
                             }
                             else
                             {
                                 MessageBox.Show("You're already sitting at this table.");
                             }
-
                         }
                     }
                 }
@@ -205,11 +204,14 @@ namespace BPTClient
             else if (checkedButton == rbSixSeats)
             {
                 frmTable ft = new frmTable(Table.tables.Count);
+                
                 frmMain.frmTables[Table.tables.Count] = ft;
                 
                 Client.listClients[0].SendMessage("cmdNewTableSixSeats¤" + User.Users[0].UserName);
 
                 ft.Show();
+
+                ft.HostSitDown();
 
             }
             else if (checkedButton == rbNineSeats)

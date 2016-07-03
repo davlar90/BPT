@@ -293,7 +293,6 @@ namespace BPTServer.Networking
                 swSenderSender = null;
             }
         }
-
         public static void StartGame(int tableID)
         {
             int numberOfPlayers = 0;
@@ -314,8 +313,15 @@ namespace BPTServer.Networking
                 {
                     if (Table.tables[tableID].Seats[i].IsOccupied)
                     {
-                        SendDataToSingleClient(Table.tables[tableID].Seats[i].SeatedUser.UserName, String.Format("cmdFromServerGivePlayerCards¤{0}¤{1}¤{2}"
-                           , tableID , Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardOne.Name, Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardTwo.Name));
+                        SendDataToSingleClient(Table.tables[tableID].Seats[i].SeatedUser.UserName, String.Format("cmdFromServerGivePlayerCards¤{0}¤{1}¤{2}¤{3}¤{4}¤{5}¤{6}¤{7}"
+                           , tableID , 
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardOne.Value, 
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardOne.Suit,
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardTwo.Value,
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardTwo.Suit,
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardOne.Name,
+                           Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardTwo.Name,
+                           Dealer.dealers[tableID].NumberOfHandsDealt));
                     }
                 }
             }
@@ -324,7 +330,5 @@ namespace BPTServer.Networking
                 Console.WriteLine("Can't start a game with less than 2 players");
             }
         }
-
-
     }
 }

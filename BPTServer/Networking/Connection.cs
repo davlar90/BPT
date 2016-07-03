@@ -280,8 +280,6 @@ namespace BPTServer.Networking
                                         { 
 
                                             if (seat.IsOccupied) avaibleSeats++;
-                                            //Server.SendDataToSingleClient(currentUser, "cmdNewPlayerJoinedTable¤" +
-                                            //splitted[1] + "¤" + seat.SeatNumber + "¤" + seat.SeatedUser.UserName);
                                         }
                                     }
                                     response = "cmdFromServerGetThisTableInfo¤" + tempTable.Host.UserName +
