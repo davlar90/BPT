@@ -307,6 +307,17 @@ namespace BPTServer.Networking
             if (numberOfPlayers > 1)
             {
                 Table.tables[tableID].NumberOfPlayers = numberOfPlayers;
+                Dealer d = new Dealer();
+                d.NewDealer(tableID);
+                Dealer.dealers[tableID].DealNewHand();
+                for (int i = 0; i < Table.tables[tableID].TableSize; i++)
+                {
+                    if (Table.tables[tableID].Seats[i].IsOccupied)
+                    {
+                        SendDataToSingleClient(Table.tables[tableID].Seats[i].SeatedUser.UserName, String.Format("cmdFromServerGivePlayerCards¤{0}¤{1}¤{2}"
+                           , tableID , Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardOne.Name, Table.tables[tableID].Seats[i].SeatedUser.PlayerHand.GivenCardTwo.Name));
+                    }
+                }
             }
             else
             {

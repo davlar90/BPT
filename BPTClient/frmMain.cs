@@ -168,6 +168,7 @@ namespace BPTClient
                                 Table t = Table.tables[listBoxTables.SelectedIndex];
                                 frmTable ft = new frmTable(t.TableID);
                                 ft.Show();
+                                Client.listClients[0].SendMessage("cmdGetSeatedPlayers¤" + t.TableID);
                                 frmTables[t.TableID] = ft;
 
 
@@ -192,6 +193,7 @@ namespace BPTClient
 
         private void btnNewLobby_Click(object sender, EventArgs e)
         {
+            
             var checkedButton = grpBoxNewTable.Controls.OfType<RadioButton>()
                                       .FirstOrDefault(r => r.Checked);
 

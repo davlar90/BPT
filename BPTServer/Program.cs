@@ -48,12 +48,18 @@ namespace BPTServer
                         testTable.Seats[i] = sea;
                     }
 
-                    testTable.Seats[5].SeatedUser.IsSmallBlind = true;
+                    testTable.Seats[2].IsOccupied = false;
+                    testTable.Seats[4].IsOccupied = false;
+                    testTable.Seats[1].IsOccupied = false;
+
+                    testTable.Seats[5].IsOccupied = false;
+
 
                     Table.tables.Add(testTable);
 
-                    Dealer.NewDealer(0);
+
                     Dealer d = new Dealer();
+                    d.NewDealer(Table.tables[0].TableID);
                     d = Dealer.dealers[0];
                     while (true)
                     {
@@ -63,14 +69,13 @@ namespace BPTServer
                             int count = 0;
                             for (int i = 0; i < 30000; i++)
                             {
-                                d.ShuffleDeck();
-                                d.DealCards();
+                                d.DealNewHand();
                                 d.DealFlop();
                                 d.DealTurn();
                                 d.DealRiver();
 
                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
-                                if (winners[0].PlayerHand.NameOfHand.Contains("Royal Straight Flush"))
+                                if (winners[0].PlayerHand.NameOfHand.Contains("Full house"))
                                 {
 
                                     
@@ -80,10 +85,14 @@ namespace BPTServer
                                         Console.WriteLine("Royal Straight Flush");
                                         foreach (Seat seat in Table.tables[0].Seats)
                                         {
-                                            string testS = String.Format("Player {0} CARDS: {1}          {2}",
-                                                seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
-                                                seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
-                                            Console.WriteLine(testS);
+                                            if (seat.IsOccupied)
+                                            {
+                                                string testS = String.Format("Player {0} CARDS: {1}          {2}",
+    seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
+    seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
+                                                Console.WriteLine(testS);
+                                            }
+
                                         }
                                         Console.WriteLine(".......");
 
@@ -113,7 +122,7 @@ namespace BPTServer
                         }
                         else if (test == "d")
                         {
-                            d.DealCards();
+                            d.DealNewHand();
                             d.DealFlop();
                             d.DealTurn();
                             d.DealRiver();
@@ -121,14 +130,34 @@ namespace BPTServer
                             {
                                 Console.WriteLine("Table cards: " + card.Name);
                             }
+                            Console.WriteLine("....");
                             foreach (Seat seat in Table.tables[0].Seats)
                             {
-                                string testS = String.Format("Player {0} CARDS: {1}          {2}",
-                                    seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
-                                    seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
-                                Console.WriteLine(testS);
+                                if (seat.IsOccupied)
+                                {
+                                    string testS = String.Format("Player {0} CARDS: {1} {2}",
+    seat.SeatedUser.UserName, seat.SeatedUser.PlayerHand.GivenCardOne.Name,
+    seat.SeatedUser.PlayerHand.GivenCardTwo.Name);
+
+                                    Console.Write(testS);
+                                    Console.BackgroundColor = ConsoleColor.Red;
+                                    if (seat.SeatedUser.IsDealer) Console.BackgroundColor = ConsoleColor.Green;
+                                    Console.Write("Dealer " + seat.SeatedUser.IsDealer.ToString() + " ");
+                                    Console.ResetColor();
+                                    Console.BackgroundColor = ConsoleColor.Red;
+                                    if (seat.SeatedUser.IsSmallBlind) Console.BackgroundColor = ConsoleColor.Green;
+                                    Console.Write("SmallBlind " + seat.SeatedUser.IsSmallBlind.ToString() + " ");
+                                    Console.ResetColor();
+                                    Console.BackgroundColor = ConsoleColor.Red;
+                                    if (seat.SeatedUser.IsBigBlind) Console.BackgroundColor = ConsoleColor.Green;
+                                    Console.WriteLine("BigBlind " + seat.SeatedUser.IsBigBlind.ToString() + " ");
+                                    Console.ResetColor();
+                                }
+
+
+
                             }
-                           List<User> winners = Rules.CheckWinners(Table.tables[0]);
+                            List<User> winners = Rules.CheckWinners(Table.tables[0]);
 
                             foreach (User u in winners)
                             {

@@ -122,6 +122,12 @@ namespace BPTClient.Networking
                     {
                         switch (splitted[0])
                         {
+                            case "cmdFromServerGivePlayerCards":
+
+                                frmMain.frmTables[int.Parse(splitted[1])].DelPlayerHand(splitted[2] + " " + splitted[3]);
+
+                                break;
+
                             case "cmdFromServerStartGame":
                                 frmMain.frmTables[int.Parse(splitted[1])].DelAppendToChat("Starting game...");
                                 frmMain.frmTables[int.Parse(splitted[1])].DelStartingGame();
@@ -195,6 +201,13 @@ namespace BPTClient.Networking
 
                                 break;
 
+                            case "cmdFromServerGetSeatedPlayers":
+                                User usr = new User(splitted[3], "");
+                                Seat s = new Seat(int.Parse(splitted[2]), usr, true, false);
+                                Table.tables[int.Parse(splitted[1])].Seats[int.Parse(splitted[2])] = s;
+                                frmMain.frmTables[int.Parse(splitted[1])].DelUpdateTables();
+                                break;
+
                             case "cmdFromServerChatAll":
                                 fm.AppendTextBoxChat(splitted[1] + splitted[2] + splitted[3]);
                                 break;
@@ -235,9 +248,9 @@ namespace BPTClient.Networking
                     }
 
                 }
-                catch 
+                catch (Exception ex)
                 {
-
+                    MessageBox.Show(ex.Message);
                     
                 }
 

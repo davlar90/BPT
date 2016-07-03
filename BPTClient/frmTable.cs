@@ -75,6 +75,17 @@ namespace BPTClient
                 AppendToStatusBox(text);
             }
         }
+
+        public void DelPlayerHand(string cards)
+        {
+
+            if (this.InvokeRequired) this.Invoke(new delSetValue(DelAppendToTableLog), cards);
+            else
+            {
+                AppendToChat("Cards: " + cards);
+            }
+        }
+
         public void DelStartingGame()
         {
 
@@ -87,7 +98,7 @@ namespace BPTClient
 
         private void StartingGame()
         {
-            btnStartGame.Visible = false;
+            //btnStartGame.Visible = false;
             cbReady.Visible = false;
 
         }

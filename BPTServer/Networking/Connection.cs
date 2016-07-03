@@ -164,6 +164,21 @@ namespace BPTServer.Networking
                                                 seatPos.ToString() + "¤" + userJoin.UserName + "¤update");
                                 break;
 
+                            case "cmdGetSeatedPlayers":
+                                
+                                for (int i = 0; i < Table.tables[int.Parse(splitted[1])].TableSize; i++)
+                                {
+                                    if (Table.tables[int.Parse(splitted[1])].Seats[i].IsOccupied)
+                                    {
+                                          Server.SendDataToSingleClient(currentUser, "cmdFromServerGetSeatedPlayers¤" + splitted[1] + "¤" + i.ToString() + "¤" +
+                                              Table.tables[int.Parse(splitted[1])].Seats[i].SeatedUser.UserName);
+                                    }
+                                }
+
+
+
+                                break;
+
                             case "cmdChatAll":
                                 Server.SendMessage(currentUser, splitted[1]);
                                 break;
@@ -262,12 +277,12 @@ namespace BPTServer.Networking
                                     foreach (Seat seat in tempTable.Seats)
                                     {
                                         if (seat.IsOccupied)
-                                    { 
+                                        { 
 
-                                        if (seat.IsOccupied) avaibleSeats++;
-                                        Server.SendDataToSingleClient(currentUser, "cmdNewPlayerJoinedTable¤" +
-                                        splitted[1] + "¤" + seat.SeatNumber + "¤" + seat.SeatedUser.UserName);
-                                    }
+                                            if (seat.IsOccupied) avaibleSeats++;
+                                            //Server.SendDataToSingleClient(currentUser, "cmdNewPlayerJoinedTable¤" +
+                                            //splitted[1] + "¤" + seat.SeatNumber + "¤" + seat.SeatedUser.UserName);
+                                        }
                                     }
                                     response = "cmdFromServerGetThisTableInfo¤" + tempTable.Host.UserName +
                                     "¤" + avaibleSeats + "¤" + tempTable.Seats.Count() + "¤" + splitted[1];
